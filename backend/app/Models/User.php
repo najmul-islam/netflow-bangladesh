@@ -2,71 +2,97 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasUuids;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    protected $table = 'users';
+    protected $primaryKey = 'user_id';
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
-        'name',
-        'username',
         'email',
-        'password',
+        'username', 
+        'password_hash',
+        'first_name',
+        'last_name',
+        'phone',
+        'avatar_url',
+        'bio',
+        'timezone',
+        'language',
         'status',
-        'role'
+        'email_verified',
+        'last_login'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
-        'password',
+        'password_hash',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified' => 'boolean',
+        'last_login' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    // Relationships
+    public function roles()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id')
+                    ->withPivot('assigned_at', 'assigned_by')
+                    ->withTimestamps();
     }
 
-    protected static function boot()
+    public function batchEnrollments()
     {
-        parent::boot();
+        return $this->hasMany(BatchEnrollment::class, 'user_id');
+    }
 
-        static::creating(function ($user) {
-            if (empty($user->username) && !empty($user->email)) {
-                $baseUsername = Str::slug(strstr($user->email, '@', true));
-                $username = $baseUsername;
-                $i = 1;
+    public function instructorBatches()
+    {
+        return $this->belongsToMany(CourseBatch::class, 'batch_instructors', 'user_id', 'batch_id')
+                    ->withPivot('role', 'assigned_at', 'assigned_by', 'is_active');
+    }
 
-                // Check for uniqueness
-                while (static::where('username', $username)->exists()) {
-                    $username = $baseUsername . $i++;
-                }
+    public function createdCourses()
+    {
+        return $this->hasMany(Course::class, 'created_by');
+    }
 
-                $user->username = $username;
-            }
-        });
+    public function addresses()
+    {
+        return $this->hasMany(Address::class, 'user_id');
+    }
+
+    // Helper methods
+    public function hasRole($roleName)
+    {
+        return $this->roles()->where('role_name', $roleName)->exists();
+    }
+
+    public function hasPermission($permissionName)
+    {
+        return $this->roles()->whereHas('permissions', function($q) use ($permissionName) {
+            $q->where('permission_name', $permissionName);
+        })->exists();
+    }
+
+    public function getFullNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
+    public function isActive()
+    {
+        return $this->status === 'active';
     }
 }
