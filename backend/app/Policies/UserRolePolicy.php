@@ -4,63 +4,51 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\UserRole;
-use Illuminate\Auth\Access\Response;
 
 class UserRolePolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
     public function viewAny(User $user): bool
     {
-        return false;
+        // Only admins can view user role assignments
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, UserRole $userRole): bool
     {
-        return false;
+        // Users can view their own role assignments
+        if ($user->user_id === $userRole->user_id) {
+            return true;
+        }
+        
+        // Only admins can view other user role assignments
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return false;
+        // Only admins can assign roles to users
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, UserRole $userRole): bool
     {
-        return false;
+        // Only admins can update user role assignments
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, UserRole $userRole): bool
     {
-        return false;
+        // Only admins can remove role assignments
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
     public function restore(User $user, UserRole $userRole): bool
     {
-        return false;
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
     public function forceDelete(User $user, UserRole $userRole): bool
     {
-        return false;
+        return $user->hasRole('admin');
     }
 }

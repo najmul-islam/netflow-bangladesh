@@ -4,63 +4,67 @@ namespace App\Policies;
 
 use App\Models\CourseBatch;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class CourseBatchPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
     public function viewAny(User $user): bool
     {
-        return false;
+        // All authenticated users can view batches
+        return $user->hasAnyRole(['student', 'instructor', 'admin']);
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, CourseBatch $courseBatch): bool
     {
-        return false;
+        // Students can view batches they are enrolled in or can enroll in
+        if ($user->hasRole('student')) {
+            // Can view if enrolled or if batch is open for enrollment
+            return $courseBatch->enrollments->where('user_id', $user->user_id)->isNotEmpty() ||
+                   $courseBatch->status === 'open';
+        }
+        
+        // Instructors can view batches they are assigned to
+        if ($user->hasRole('instructor')) {
+            return $courseBatch->instructors->contains($user->user_id);
+        }
+        
+        // Admins can view all
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return false;
+        // Only instructors and admins can create batches
+        return $user->hasAnyRole(['instructor', 'admin']);
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, CourseBatch $courseBatch): bool
     {
-        return false;
+        // Instructors can update their assigned batches
+        if ($user->hasRole('instructor')) {
+            return $courseBatch->instructors->contains($user->user_id);
+        }
+        
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, CourseBatch $courseBatch): bool
     {
-        return false;
+        // Instructors can delete their batches if no students are enrolled
+        if ($user->hasRole('instructor')) {
+            return $courseBatch->instructors->contains($user->user_id) &&
+                   $courseBatch->enrollments->isEmpty();
+        }
+        
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
     public function restore(User $user, CourseBatch $courseBatch): bool
     {
-        return false;
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
     public function forceDelete(User $user, CourseBatch $courseBatch): bool
     {
-        return false;
+        return $user->hasRole('admin');
     }
 }

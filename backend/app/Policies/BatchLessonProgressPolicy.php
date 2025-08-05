@@ -4,63 +4,72 @@ namespace App\Policies;
 
 use App\Models\BatchLessonProgress;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class BatchLessonProgressPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
     public function viewAny(User $user): bool
     {
-        return false;
+        // All users can view lesson progress
+        return $user->hasAnyRole(['student', 'instructor', 'admin']);
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, BatchLessonProgress $batchLessonProgress): bool
     {
-        return false;
+        // Students can view their own progress
+        if ($user->hasRole('student')) {
+            return $batchLessonProgress->user_id === $user->user_id;
+        }
+        
+        // Instructors can view progress for their batch students
+        if ($user->hasRole('instructor')) {
+            return $batchLessonProgress->batch && 
+                   $batchLessonProgress->batch->instructors->contains($user->user_id);
+        }
+        
+        // Admins can view all
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return false;
+        // Students create their own progress, instructors and admins can create for others
+        return $user->hasAnyRole(['student', 'instructor', 'admin']);
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, BatchLessonProgress $batchLessonProgress): bool
     {
-        return false;
+        // Students can update their own progress
+        if ($user->hasRole('student')) {
+            return $batchLessonProgress->user_id === $user->user_id;
+        }
+        
+        // Instructors can update progress for their batch students
+        if ($user->hasRole('instructor')) {
+            return $batchLessonProgress->batch && 
+                   $batchLessonProgress->batch->instructors->contains($user->user_id);
+        }
+        
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, BatchLessonProgress $batchLessonProgress): bool
     {
-        return false;
+        // Only instructors and admins can delete progress records
+        if ($user->hasRole('instructor')) {
+            return $batchLessonProgress->batch && 
+                   $batchLessonProgress->batch->instructors->contains($user->user_id);
+        }
+        
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
     public function restore(User $user, BatchLessonProgress $batchLessonProgress): bool
     {
-        return false;
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
     public function forceDelete(User $user, BatchLessonProgress $batchLessonProgress): bool
     {
-        return false;
+        return $user->hasRole('admin');
     }
 }

@@ -4,63 +4,68 @@ namespace App\Policies;
 
 use App\Models\BatchSchedule;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class BatchSchedulePolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
     public function viewAny(User $user): bool
     {
-        return false;
+        // All users can view batch schedules
+        return $user->hasAnyRole(['student', 'instructor', 'admin']);
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, BatchSchedule $batchSchedule): bool
     {
-        return false;
+        // Students can view schedules for their enrolled batches
+        if ($user->hasRole('student')) {
+            return $batchSchedule->batch && 
+                   $batchSchedule->batch->enrollments->where('user_id', $user->user_id)->isNotEmpty();
+        }
+        
+        // Instructors can view schedules for their batches
+        if ($user->hasRole('instructor')) {
+            return $batchSchedule->batch && 
+                   $batchSchedule->batch->instructors->contains($user->user_id);
+        }
+        
+        // Admins can view all
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return false;
+        // Only instructors and admins can create schedules
+        return $user->hasAnyRole(['instructor', 'admin']);
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, BatchSchedule $batchSchedule): bool
     {
-        return false;
+        // Instructors can update schedules for their batches
+        if ($user->hasRole('instructor')) {
+            return $batchSchedule->batch && 
+                   $batchSchedule->batch->instructors->contains($user->user_id);
+        }
+        
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, BatchSchedule $batchSchedule): bool
     {
-        return false;
+        // Instructors can delete schedules for their batches
+        if ($user->hasRole('instructor')) {
+            return $batchSchedule->batch && 
+                   $batchSchedule->batch->instructors->contains($user->user_id);
+        }
+        
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
     public function restore(User $user, BatchSchedule $batchSchedule): bool
     {
-        return false;
+        return $user->hasRole('admin');
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
     public function forceDelete(User $user, BatchSchedule $batchSchedule): bool
     {
-        return false;
+        return $user->hasRole('admin');
     }
 }
