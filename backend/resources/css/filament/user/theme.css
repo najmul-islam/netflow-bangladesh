@@ -1,0 +1,381 @@
+@import '../../../css/app.css';
+
+/* Custom User Panel Styles with Brand Colors */
+:root {
+    --primary: #0b2e58;
+    --primary-50: #eff6ff;
+    --primary-400: #60a5fa;
+    --primary-500: #0b2e58;
+    --primary-600: #0b2e58;
+    --secondary: #f76704;
+    --secondary-50: #fff7ed;
+    --secondary-500: #f76704;
+}
+
+/* Industry Standard Login Page Design */
+.fi-simple-layout {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0b2e58 0%, #1e40af 25%, #f76704 75%, #ea580c 100%);
+    position: relative;
+}
+
+.fi-simple-layout::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(11, 46, 88, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(247, 103, 4, 0.3) 0%, transparent 50%);
+    z-index: 1;
+}
+
+.fi-simple-main {
+    position: relative;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    box-shadow: 
+        0 32px 64px -12px rgba(11, 46, 88, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Enhanced Form Styling */
+.fi-input {
+    border-color: #d1d5db;
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fi-input:focus {
+    border-color: #0b2e58;
+    box-shadow: 0 0 0 3px rgba(11, 46, 88, 0.1);
+}
+
+/* Enhanced Button Styling */
+.fi-btn-primary {
+    background: linear-gradient(135deg, #0b2e58 0%, #0b2e58 100%);
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 12px 24px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 4px 14px 0 rgba(11, 46, 88, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.fi-btn-primary:hover {
+    background: linear-gradient(135deg, #0b2e58 0%, #f76704 100%);
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 25px 0 rgba(11, 46, 88, 0.35),
+        0 2px 8px 0 rgba(247, 103, 4, 0.2);
+}
+
+/* Custom Navigation Styles */
+.fi-sidebar {
+    background: linear-gradient(180deg, #0b2e58 0%, #1e40af 100%);
+    border: none;
+    box-shadow: 4px 0 24px rgba(11, 46, 88, 0.15);
+}
+
+.fi-sidebar-nav-item {
+    transition: all 0.3s;
+    border-radius: 12px;
+    margin: 4px 8px;
+}
+
+.fi-sidebar-nav-item-active {
+    background: linear-gradient(135deg, rgba(247, 103, 4, 0.9) 0%, rgba(247, 103, 4, 1) 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(247, 103, 4, 0.3);
+    border: none;
+}
+
+.fi-sidebar-nav-item:hover:not(.fi-sidebar-nav-item-active) {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+/* Industry Standard Login Page Design */
+.fi-simple-layout {
+    @apply min-h-screen;
+    background: linear-gradient(135deg, #0b2e58 0%, #1e40af 25%, #f76704 75%, #ea580c 100%);
+    position: relative;
+}
+
+.fi-simple-layout::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(11, 46, 88, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(247, 103, 4, 0.3) 0%, transparent 50%);
+    z-index: 1;
+}
+
+.fi-simple-main {
+    @apply relative z-10;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    box-shadow: 
+        0 32px 64px -12px rgba(11, 46, 88, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Enhanced Form Styling */
+.fi-input-wrapper .fi-input {
+    @apply border-gray-200 focus:border-primary-500 focus:ring-primary-500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fi-input-wrapper .fi-input:focus {
+    box-shadow: 0 0 0 3px rgba(11, 46, 88, 0.1);
+}
+
+/* Enhanced Button Styling */
+.fi-btn-primary {
+    background: linear-gradient(135deg, #0b2e58 0%, #0b2e58 100%);
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 12px 24px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 4px 14px 0 rgba(11, 46, 88, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.fi-btn-primary:hover {
+    background: linear-gradient(135deg, #0b2e58 0%, #f76704 100%);
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 25px 0 rgba(11, 46, 88, 0.35),
+        0 2px 8px 0 rgba(247, 103, 4, 0.2);
+}
+
+.fi-btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Logo and Branding */
+.fi-simple-header {
+    @apply text-center mb-8;
+}
+
+.fi-logo {
+    @apply mx-auto mb-6;
+    filter: drop-shadow(0 4px 8px rgba(11, 46, 88, 0.2));
+}
+
+/* Custom Navigation Styles */
+.fi-sidebar {
+    background: linear-gradient(180deg, #0b2e58 0%, #1e40af 100%);
+    border: none;
+    box-shadow: 4px 0 24px rgba(11, 46, 88, 0.15);
+}
+
+.fi-sidebar-nav-item {
+    @apply transition-all duration-300;
+    border-radius: 12px;
+    margin: 4px 8px;
+}
+
+.fi-sidebar-nav-item-active {
+    background: linear-gradient(135deg, rgba(247, 103, 4, 0.9) 0%, rgba(247, 103, 4, 1) 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(247, 103, 4, 0.3);
+    border: none;
+}
+
+.fi-sidebar-nav-item:hover:not(.fi-sidebar-nav-item-active) {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+/* Enhanced Card Styles */
+.fi-section, .fi-widget {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(11, 46, 88, 0.08);
+    border-radius: 16px;
+    box-shadow: 
+        0 4px 24px rgba(11, 46, 88, 0.08),
+        0 1px 4px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fi-section:hover, .fi-widget:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 32px rgba(11, 46, 88, 0.12),
+        0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Dashboard Widget Enhancements */
+.fi-stats-overview-stat {
+    @apply transition-all duration-300;
+}
+
+.fi-stats-overview-stat:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(11, 46, 88, 0.15);
+}
+
+/* Header Styling */
+.fi-main-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(11, 46, 88, 0.08);
+    box-shadow: 0 1px 8px rgba(11, 46, 88, 0.04);
+}
+
+/* Page Body Enhancement */
+.fi-body {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #f8fafc 100%);
+    min-height: 100vh;
+}
+
+/* Typography Improvements */
+.fi-heading {
+    @apply text-[#0b2e58] font-bold;
+}
+
+.fi-subheading {
+    @apply text-gray-600;
+}
+
+/* Link Styling */
+.fi-link {
+    @apply text-[#f76704] hover:text-[#0b2e58];
+    transition: color 0.3s ease;
+}
+
+/* Form Label Styling */
+.fi-label {
+    @apply text-[#0b2e58] font-medium;
+}
+
+/* Table Enhancements */
+.fi-table {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(11, 46, 88, 0.08);
+}
+
+.fi-table-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 2px solid #0b2e58;
+}
+
+.fi-table-row:hover {
+    background: rgba(11, 46, 88, 0.02);
+}
+
+/* Notification Styling */
+.fi-notification {
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(11, 46, 88, 0.15);
+}
+
+.fi-notification-success {
+    border-left: 4px solid #10b981;
+}
+
+.fi-notification-error {
+    border-left: 4px solid #ef4444;
+}
+
+.fi-notification-warning {
+    border-left: 4px solid #f76704;
+}
+
+/* Modal Enhancements */
+.fi-modal {
+    border-radius: 20px;
+    box-shadow: 
+        0 40px 80px rgba(11, 46, 88, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Loading States */
+.fi-loading {
+    @apply text-[#0b2e58];
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .fi-simple-main {
+        margin: 16px;
+        border-radius: 16px;
+    }
+    
+    .fi-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .fi-sidebar.show {
+        transform: translateX(0);
+    }
+}
+
+/* Accessibility Improvements */
+.fi-btn:focus {
+    outline: 2px solid #0b2e58;
+    outline-offset: 2px;
+}
+
+.fi-input:focus {
+    outline: 2px solid #0b2e58;
+    outline-offset: 2px;
+}
+
+.fi-btn-secondary {
+    background: linear-gradient(135deg, #f76704 0%, #f76704 100%);
+    border: none;
+    box-shadow: 0 4px 20px rgba(247, 103, 4, 0.3);
+}
+
+.fi-btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(247, 103, 4, 0.4);
+}
+
+/* Dashboard Grid Customization */
+.fi-dashboard-widget {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(11, 46, 88, 0.1);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.fi-dashboard-widget:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(11, 46, 88, 0.1);
+}
+
+/* Custom Login Page */
+.fi-simple-layout {
+    background: linear-gradient(135deg, #0b2e58 0%, #f76704 100%);
+    min-height: 100vh;
+}
+
+.fi-simple-main {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(11, 46, 88, 0.2);
+    border: 1px solid rgba(247, 103, 4, 0.1);
+}
