@@ -1,4 +1,4 @@
-@import '../../../css/app.css';
+@import "../../../css/app.css";
 
 /* Custom User Panel Styles with Brand Colors */
 :root {
@@ -15,19 +15,33 @@
 /* Industry Standard Login Page Design */
 .fi-simple-layout {
     min-height: 100vh;
-    background: linear-gradient(135deg, #0b2e58 0%, #1e40af 25%, #f76704 75%, #ea580c 100%);
+    background: linear-gradient(
+        135deg,
+        #0b2e58 0%,
+        #1e40af 25%,
+        #f76704 75%,
+        #ea580c 100%
+    );
     position: relative;
 }
 
 .fi-simple-layout::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 20% 80%, rgba(11, 46, 88, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(247, 103, 4, 0.3) 0%, transparent 50%);
+    background: radial-gradient(
+            circle at 20% 80%,
+            rgba(11, 46, 88, 0.3) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 80% 20%,
+            rgba(247, 103, 4, 0.3) 0%,
+            transparent 50%
+        );
     z-index: 1;
 }
 
@@ -38,8 +52,7 @@
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 24px;
-    box-shadow: 
-        0 32px 64px -12px rgba(11, 46, 88, 0.3),
+    box-shadow: 0 32px 64px -12px rgba(11, 46, 88, 0.3),
         0 0 0 1px rgba(255, 255, 255, 0.05),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
@@ -64,16 +77,14 @@
     font-weight: 600;
     padding: 12px 24px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 
-        0 4px 14px 0 rgba(11, 46, 88, 0.25),
+    box-shadow: 0 4px 14px 0 rgba(11, 46, 88, 0.25),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .fi-btn-primary:hover {
     background: linear-gradient(135deg, #0b2e58 0%, #f76704 100%);
     transform: translateY(-2px);
-    box-shadow: 
-        0 8px 25px 0 rgba(11, 46, 88, 0.35),
+    box-shadow: 0 8px 25px 0 rgba(11, 46, 88, 0.35),
         0 2px 8px 0 rgba(247, 103, 4, 0.2);
 }
 
@@ -91,7 +102,11 @@
 }
 
 .fi-sidebar-nav-item-active {
-    background: linear-gradient(135deg, rgba(247, 103, 4, 0.9) 0%, rgba(247, 103, 4, 1) 100%);
+    background: linear-gradient(
+        135deg,
+        rgba(247, 103, 4, 0.9) 0%,
+        rgba(247, 103, 4, 1) 100%
+    );
     color: white;
     box-shadow: 0 4px 12px rgba(247, 103, 4, 0.3);
     border: none;
@@ -105,19 +120,33 @@
 /* Industry Standard Login Page Design */
 .fi-simple-layout {
     @apply min-h-screen;
-    background: linear-gradient(135deg, #0b2e58 0%, #1e40af 25%, #f76704 75%, #ea580c 100%);
+    background: linear-gradient(
+        135deg,
+        #0b2e58 0%,
+        #1e40af 25%,
+        #f76704 75%,
+        #ea580c 100%
+    );
     position: relative;
 }
 
 .fi-simple-layout::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 20% 80%, rgba(11, 46, 88, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(247, 103, 4, 0.3) 0%, transparent 50%);
+    background: radial-gradient(
+            circle at 20% 80%,
+            rgba(11, 46, 88, 0.3) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 80% 20%,
+            rgba(247, 103, 4, 0.3) 0%,
+            transparent 50%
+        );
     z-index: 1;
 }
 
@@ -127,8 +156,7 @@
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 24px;
-    box-shadow: 
-        0 32px 64px -12px rgba(11, 46, 88, 0.3),
+    box-shadow: 0 32px 64px -12px rgba(11, 46, 88, 0.3),
         0 0 0 1px rgba(255, 255, 255, 0.05),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
@@ -151,16 +179,14 @@
     font-weight: 600;
     padding: 12px 24px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 
-        0 4px 14px 0 rgba(11, 46, 88, 0.25),
+    box-shadow: 0 4px 14px 0 rgba(11, 46, 88, 0.25),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .fi-btn-primary:hover {
     background: linear-gradient(135deg, #0b2e58 0%, #f76704 100%);
     transform: translateY(-2px);
-    box-shadow: 
-        0 8px 25px 0 rgba(11, 46, 88, 0.35),
+    box-shadow: 0 8px 25px 0 rgba(11, 46, 88, 0.35),
         0 2px 8px 0 rgba(247, 103, 4, 0.2);
 }
 
@@ -192,7 +218,11 @@
 }
 
 .fi-sidebar-nav-item-active {
-    background: linear-gradient(135deg, rgba(247, 103, 4, 0.9) 0%, rgba(247, 103, 4, 1) 100%);
+    background: linear-gradient(
+        135deg,
+        rgba(247, 103, 4, 0.9) 0%,
+        rgba(247, 103, 4, 1) 100%
+    );
     color: white;
     box-shadow: 0 4px 12px rgba(247, 103, 4, 0.3);
     border: none;
@@ -204,22 +234,20 @@
 }
 
 /* Enhanced Card Styles */
-.fi-section, .fi-widget {
+.fi-section,
+.fi-widget {
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(11, 46, 88, 0.08);
     border-radius: 16px;
-    box-shadow: 
-        0 4px 24px rgba(11, 46, 88, 0.08),
-        0 1px 4px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 4px 24px rgba(11, 46, 88, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.fi-section:hover, .fi-widget:hover {
+.fi-section:hover,
+.fi-widget:hover {
     transform: translateY(-2px);
-    box-shadow: 
-        0 8px 32px rgba(11, 46, 88, 0.12),
-        0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 32px rgba(11, 46, 88, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 /* Dashboard Widget Enhancements */
@@ -303,8 +331,7 @@
 /* Modal Enhancements */
 .fi-modal {
     border-radius: 20px;
-    box-shadow: 
-        0 40px 80px rgba(11, 46, 88, 0.2),
+    box-shadow: 0 40px 80px rgba(11, 46, 88, 0.2),
         0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
@@ -319,12 +346,12 @@
         margin: 16px;
         border-radius: 16px;
     }
-    
+
     .fi-sidebar {
         transform: translateX(-100%);
         transition: transform 0.3s ease;
     }
-    
+
     .fi-sidebar.show {
         transform: translateX(0);
     }
