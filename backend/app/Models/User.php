@@ -37,6 +37,17 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    // Accessors & Mutators
+    public function getPasswordAttribute()
+    {
+        return $this->password_hash;
+    }
+
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password_hash'] = $value;
+    }
+
     protected $casts = [
         'email_verified' => 'boolean',
         'last_login' => 'datetime',
@@ -71,6 +82,31 @@ class User extends Authenticatable
     public function addresses()
     {
         return $this->hasMany(Address::class, 'user_id');
+    }
+
+    public function enrollments()
+    {
+        return $this->hasMany(BatchEnrollment::class, 'user_id');
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'user_id');
+    }
+
+    public function certificates()
+    {
+        return $this->hasMany(BatchCertificate::class, 'user_id');
+    }
+
+    public function lessonProgress()
+    {
+        return $this->hasMany(BatchLessonProgress::class, 'user_id');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(BatchReview::class, 'user_id');
     }
 
     // Helper methods
