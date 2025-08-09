@@ -12,13 +12,81 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @OA\Tag(
+ *     name="User Certificates",
+ *     description="Endpoints for managing user certificates (requires authentication)"
+ * )
+ */
 class CertificateController extends Controller
 {
     /**
-     * Get user's certificates
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @OA\Get(
+     *     path="/api/user/certificates",
+     *     tags={"User Certificates"},
+     *     summary="Get user certificates",
+     *     description="Get all certificates for the authenticated user",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="batch_id",
+     *         in="query",
+     *         description="Filter by batch ID",
+     *         required=false,
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Filter by certificate status",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"draft", "issued", "revoked"}, example="issued")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of items per page (max 100)",
+     *         required=false,
+     *         @OA\Schema(type="integer", minimum=1, maximum=100, example=10)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User certificates retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="certificate_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="certificate_number", type="string", example="CERT-2024-001"),
+     *                     @OA\Property(property="issued_date", type="string", example="2024-01-20"),
+     *                     @OA\Property(property="status", type="string", example="issued"),
+     *                     @OA\Property(property="course_title", type="string", example="Web Development Fundamentals"),
+     *                     @OA\Property(property="batch_name", type="string", example="Web Dev Batch 2024-A"),
+     *                     @OA\Property(property="completion_date", type="string", example="2024-01-18"),
+     *                     @OA\Property(property="final_score", type="number", format="float", example=85.5)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Validation failed"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function getCertificates(Request $request)
     {
@@ -70,7 +138,62 @@ class CertificateController extends Controller
     }
 
     /**
-     * Get specific certificate details
+     * @OA\Get(
+     *     path="/api/user/certificates/{certificate_id}",
+     *     tags={"User Certificates"},
+     *     summary="Get certificate details",
+     *     description="Get detailed information about a specific certificate",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="certificate_id",
+     *         in="path",
+     *         required=true,
+     *         description="The certificate ID",
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Certificate details retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="certificate_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="certificate_number", type="string", example="CERT-2024-001"),
+     *                 @OA\Property(property="issued_date", type="string", example="2024-01-20"),
+     *                 @OA\Property(property="status", type="string", example="issued"),
+     *                 @OA\Property(property="course_title", type="string", example="Web Development Fundamentals"),
+     *                 @OA\Property(property="batch_name", type="string", example="Web Dev Batch 2024-A"),
+     *                 @OA\Property(property="completion_date", type="string", example="2024-01-18"),
+     *                 @OA\Property(property="final_score", type="number", format="float", example=85.5),
+     *                 @OA\Property(property="certificate_url", type="string", example="https://example.com/certificates/cert-001.pdf"),
+     *                 @OA\Property(
+     *                     property="user_details",
+     *                     type="object",
+     *                     @OA\Property(property="name", type="string", example="John Doe"),
+     *                     @OA\Property(property="email", type="string", example="john@example.com")
+     *                 )
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Certificate details retrieved successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Certificate not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Certificate not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      *
      * @param string $certificateId
      * @return \Illuminate\Http\JsonResponse

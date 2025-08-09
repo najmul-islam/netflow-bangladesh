@@ -9,9 +9,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
- * @group User API - Notifications
- * 
- * Endpoints for managing user notifications (requires authentication)
+ * @OA\Tag(
+ *     name="User Notifications",
+ *     description="Endpoints for managing user notifications (requires authentication)"
+ * )
  */
 class NotificationController extends Controller
 {
@@ -21,33 +22,65 @@ class NotificationController extends Controller
     }
 
     /**
-     * Get user notifications
-     * 
-     * Get all notifications for the authenticated user.
-     * 
-     * @authenticated
-     * @queryParam type string Filter by notification type (announcement,assignment,assessment,message,reminder,certificate). Example: assignment
-     * @queryParam is_read boolean Filter by read status. Example: false
-     * @queryParam batch_id string Filter by batch ID. Example: "uuid-string"
-     * @queryParam per_page integer Number of notifications per page (max 50). Example: 20
-     * 
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "notification_id": "uuid-string",
-     *       "title": "New Assignment Posted",
-     *       "message": "A new HTML/CSS assignment has been posted for your batch.",
-     *       "notification_type": "assignment",
-     *       "priority": "medium",
-     *       "is_read": false,
-     *       "read_at": null,
-     *       "sent_at": "2024-01-20T14:30:00Z",
-     *       "scheduled_at": "2024-01-20T14:30:00Z",
-     *       "batch": {
-     *         "batch_id": "uuid-string",
-     *         "batch_name": "Web Dev Batch 2024-A",
-     *         "course_title": "Web Development Fundamentals"
-     *       },
+     * @OA\Get(
+     *     path="/api/user/notifications",
+     *     tags={"User Notifications"},
+     *     summary="Get user notifications",
+     *     description="Get all notifications for the authenticated user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="type",
+     *         in="query",
+     *         description="Filter by notification type",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"announcement","assignment","assessment","message","reminder","certificate"}, example="assignment")
+     *     ),
+     *     @OA\Parameter(
+     *         name="is_read",
+     *         in="query",
+     *         description="Filter by read status",
+     *         required=false,
+     *         @OA\Schema(type="boolean", example=false)
+     *     ),
+     *     @OA\Parameter(
+     *         name="batch_id",
+     *         in="query",
+     *         description="Filter by batch ID",
+     *         required=false,
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of notifications per page (max 50)",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=20)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User notifications",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="notification_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="title", type="string", example="New Assignment Posted"),
+     *                     @OA\Property(property="message", type="string", example="A new HTML/CSS assignment has been posted for your batch"),
+     *                     @OA\Property(property="type", type="string", example="assignment"),
+     *                     @OA\Property(property="priority", type="string", example="medium"),
+     *                     @OA\Property(property="is_read", type="boolean", example=false),
+     *                     @OA\Property(property="sent_at", type="string", example="2024-01-20T14:30:00Z")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     )
+     * )
      *       "action_data": {
      *         "url": "/assignments/uuid-string",
      *         "type": "assignment",
@@ -79,10 +112,10 @@ class NotificationController extends Controller
             'batch:batch_id,batch_name,course_id',
             'batch.course:course_id,title'
         ])
-        ->where('recipient_id', auth()->user()->user_id);
+        ->where('user_id', auth()->user()->user_id);
 
         if ($request->filled('type')) {
-            $query->where('notification_type', $request->type);
+            $query->where('type', $request->type);
         }
 
         if ($request->filled('is_read')) {
@@ -104,7 +137,7 @@ class NotificationController extends Controller
             ->paginate($perPage);
 
         // Get unread count
-        $unreadCount = BatchNotification::where('recipient_id', auth()->user()->user_id)
+        $unreadCount = BatchNotification::where('user_id', auth()->user()->user_id)
             ->whereNull('read_at')
             ->where('scheduled_at', '<=', now())
             ->count();
@@ -122,21 +155,46 @@ class NotificationController extends Controller
     }
 
     /**
-     * Mark notification as read
-     * 
-     * Mark a specific notification as read.
-     * 
-     * @authenticated
-     * @urlParam notification_id string required The notification ID. Example: "uuid-string"
-     * 
-     * @response 200 {
-     *   "message": "Notification marked as read"
-     * }
+     * @OA\Patch(
+     *     path="/api/user/notifications/{notification_id}/read",
+     *     tags={"User Notifications"},
+     *     summary="Mark notification as read",
+     *     description="Mark a specific notification as read",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="notification_id",
+     *         in="path",
+     *         description="The notification ID",
+     *         required=true,
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Notification marked as read successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Notification marked as read")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Notification not found or already read",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Notification not found or already read")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function markAsRead(string $notification_id): JsonResponse
     {
         $notification = BatchNotification::where('notification_id', $notification_id)
-            ->where('recipient_id', auth()->user()->user_id)
+            ->where('user_id', auth()->user()->user_id)
             ->whereNull('read_at')
             ->first();
 
@@ -154,17 +212,35 @@ class NotificationController extends Controller
     }
 
     /**
-     * Mark all notifications as read
-     * 
-     * Mark all unread notifications as read for the authenticated user.
-     * 
-     * @authenticated
-     * @queryParam batch_id string Optional: Mark as read only for specific batch. Example: "uuid-string"
-     * 
-     * @response 200 {
-     *   "message": "All notifications marked as read",
-     *   "marked_count": 12
-     * }
+     * @OA\Patch(
+     *     path="/api/user/notifications/mark-all-read",
+     *     tags={"User Notifications"},
+     *     summary="Mark all notifications as read",
+     *     description="Mark all unread notifications as read for the authenticated user",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="batch_id",
+     *         in="query",
+     *         description="Optional: Mark as read only for specific batch",
+     *         required=false,
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="All notifications marked as read successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="All notifications marked as read"),
+     *             @OA\Property(property="marked_count", type="integer", example=12)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function markAllAsRead(Request $request): JsonResponse
     {
@@ -172,7 +248,7 @@ class NotificationController extends Controller
             'batch_id' => 'nullable|exists:course_batches,batch_id'
         ]);
 
-        $query = BatchNotification::where('recipient_id', auth()->user()->user_id)
+        $query = BatchNotification::where('user_id', auth()->user()->user_id)
             ->whereNull('read_at')
             ->where('scheduled_at', '<=', now());
 
@@ -245,45 +321,76 @@ class NotificationController extends Controller
     }
 
     /**
-     * Update notification preferences
-     * 
-     * Update user's notification preferences.
-     * 
-     * @authenticated
-     * @bodyParam email_notifications boolean Enable/disable email notifications.
-     * @bodyParam push_notifications boolean Enable/disable push notifications.
-     * @bodyParam notification_types object Notification type preferences.
-     * @bodyParam notification_types.announcement boolean Enable announcement notifications.
-     * @bodyParam notification_types.assignment boolean Enable assignment notifications.
-     * @bodyParam notification_types.assessment boolean Enable assessment notifications.
-     * @bodyParam notification_types.message boolean Enable message notifications.
-     * @bodyParam notification_types.reminder boolean Enable reminder notifications.
-     * @bodyParam notification_types.certificate boolean Enable certificate notifications.
-     * @bodyParam quiet_hours object Quiet hours configuration.
-     * @bodyParam quiet_hours.enabled boolean Enable quiet hours.
-     * @bodyParam quiet_hours.start_time string Quiet hours start time (HH:MM format).
-     * @bodyParam quiet_hours.end_time string Quiet hours end time (HH:MM format).
-     * 
-     * @response 200 {
-     *   "message": "Notification preferences updated successfully",
-     *   "data": {
-     *     "email_notifications": true,
-     *     "push_notifications": false,
-     *     "notification_types": {
-     *       "announcement": true,
-     *       "assignment": true,
-     *       "assessment": true,
-     *       "message": true,
-     *       "reminder": false,
-     *       "certificate": true
-     *     },
-     *     "quiet_hours": {
-     *       "enabled": true,
-     *       "start_time": "22:00",
-     *       "end_time": "08:00"
-     *     }
-     *   }
-     * }
+     * @OA\Put(
+     *     path="/api/user/notifications/preferences",
+     *     tags={"User Notifications"},
+     *     summary="Update notification preferences",
+     *     description="Update user's notification preferences",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email_notifications", type="boolean", description="Enable/disable email notifications", example=true),
+     *             @OA\Property(property="push_notifications", type="boolean", description="Enable/disable push notifications", example=false),
+     *             @OA\Property(
+     *                 property="notification_types",
+     *                 type="object",
+     *                 description="Notification type preferences",
+     *                 @OA\Property(property="announcement", type="boolean", description="Enable announcement notifications", example=true),
+     *                 @OA\Property(property="assignment", type="boolean", description="Enable assignment notifications", example=true),
+     *                 @OA\Property(property="assessment", type="boolean", description="Enable assessment notifications", example=true),
+     *                 @OA\Property(property="message", type="boolean", description="Enable message notifications", example=true),
+     *                 @OA\Property(property="reminder", type="boolean", description="Enable reminder notifications", example=false),
+     *                 @OA\Property(property="certificate", type="boolean", description="Enable certificate notifications", example=true)
+     *             ),
+     *             @OA\Property(
+     *                 property="quiet_hours",
+     *                 type="object",
+     *                 description="Quiet hours configuration",
+     *                 @OA\Property(property="enabled", type="boolean", description="Enable quiet hours", example=true),
+     *                 @OA\Property(property="start_time", type="string", description="Quiet hours start time (HH:MM format)", example="22:00"),
+     *                 @OA\Property(property="end_time", type="string", description="Quiet hours end time (HH:MM format)", example="08:00")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Notification preferences updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Notification preferences updated successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="email_notifications", type="boolean", example=true),
+     *                 @OA\Property(property="push_notifications", type="boolean", example=false),
+     *                 @OA\Property(
+     *                     property="notification_types",
+     *                     type="object",
+     *                     @OA\Property(property="announcement", type="boolean", example=true),
+     *                     @OA\Property(property="assignment", type="boolean", example=true),
+     *                     @OA\Property(property="assessment", type="boolean", example=true),
+     *                     @OA\Property(property="message", type="boolean", example=true),
+     *                     @OA\Property(property="reminder", type="boolean", example=false),
+     *                     @OA\Property(property="certificate", type="boolean", example=true)
+     *                 ),
+     *                 @OA\Property(
+     *                     property="quiet_hours",
+     *                     type="object",
+     *                     @OA\Property(property="enabled", type="boolean", example=true),
+     *                     @OA\Property(property="start_time", type="string", example="22:00"),
+     *                     @OA\Property(property="end_time", type="string", example="08:00")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function updatePreferences(Request $request): JsonResponse
     {

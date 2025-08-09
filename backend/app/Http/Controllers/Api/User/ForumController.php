@@ -12,9 +12,45 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Tag(
+ *     name="User Forum",
+ *     description="Endpoints for forum discussions and topics (requires authentication)"
+ * )
+ */
 class ForumController extends Controller
 {
     /**
+     * @OA\Get(
+     *     path="/api/user/forum",
+     *     tags={"User Forum"},
+     *     summary="Get forums",
+     *     description="Get forums for user's enrolled batches",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Available forums",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="forum_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="title", type="string", example="General Discussion"),
+     *                     @OA\Property(property="description", type="string", example="General course discussions"),
+     *                     @OA\Property(property="topics_count", type="integer", example=25),
+     *                     @OA\Property(property="latest_activity", type="string", example="2024-01-20T10:00:00Z")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     )
+     * )
+     *
      * Get forums for user's enrolled batches
      *
      * @return \Illuminate\Http\JsonResponse

@@ -12,9 +12,60 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Tag(
+ *     name="User Schedule",
+ *     description="Endpoints for managing class schedules and attendance (requires authentication)"
+ * )
+ */
 class ScheduleController extends Controller
 {
     /**
+     * @OA\Get(
+     *     path="/api/user/schedule",
+     *     tags={"User Schedule"},
+     *     summary="Get user schedule",
+     *     description="Get user's class schedule",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="batch_id",
+     *         in="query",
+     *         description="Filter by batch ID",
+     *         required=false,
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="date_from",
+     *         in="query",
+     *         description="Filter from date",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date", example="2024-01-20")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User schedule",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="schedule_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="class_date", type="string", example="2024-01-20"),
+     *                     @OA\Property(property="start_time", type="string", example="19:00:00"),
+     *                     @OA\Property(property="end_time", type="string", example="21:00:00"),
+     *                     @OA\Property(property="topic", type="string", example="JavaScript Fundamentals"),
+     *                     @OA\Property(property="status", type="string", example="scheduled")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     )
+     * )
+     *
      * Get user's class schedule
      *
      * @param \Illuminate\Http\Request $request
@@ -64,18 +115,18 @@ class ScheduleController extends Controller
                 }]);
             
             if ($request->date_from) {
-                $scheduleQuery->where('scheduled_date', '>=', $request->date_from);
+                $scheduleQuery->where('start_datetime', '>=', $request->date_from);
             }
             
             if ($request->date_to) {
-                $scheduleQuery->where('scheduled_date', '<=', $request->date_to);
+                $scheduleQuery->where('start_datetime', '<=', $request->date_to);
             }
             
             if ($request->status) {
                 $scheduleQuery->where('status', $request->status);
             }
             
-            $schedules = $scheduleQuery->orderBy('scheduled_date', 'asc')
+            $schedules = $scheduleQuery->orderBy('start_datetime', 'asc')
                 ->orderBy('start_time', 'asc')
                 ->get();
             
@@ -344,10 +395,10 @@ class ScheduleController extends Controller
             
             $upcomingClasses = BatchSchedule::whereIn('batch_id', $enrolledBatchIds)
                 ->where('status', 'scheduled')
-                ->where('scheduled_date', '>=', now()->toDateString())
-                ->where('scheduled_date', '<=', now()->addDays($daysAhead)->toDateString())
+                ->where('start_datetime', '>=', now()->toDateString())
+                ->where('start_datetime', '<=', now()->addDays($daysAhead)->toDateString())
                 ->with(['batch.course', 'lesson'])
-                ->orderBy('scheduled_date', 'asc')
+                ->orderBy('start_datetime', 'asc')
                 ->orderBy('start_time', 'asc')
                 ->limit($limit)
                 ->get();

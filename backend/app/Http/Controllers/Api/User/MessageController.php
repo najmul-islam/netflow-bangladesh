@@ -11,9 +11,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 /**
- * @group User API - Messaging
- * 
- * Endpoints for messaging and forum communication (requires authentication)
+ * @OA\Tag(
+ *     name="User Messaging",
+ *     description="Endpoints for messaging and forum communication (requires authentication)"
+ * )
  */
 class MessageController extends Controller
 {
@@ -23,46 +24,91 @@ class MessageController extends Controller
     }
 
     /**
-     * Get user messages
-     * 
-     * Get all messages for the authenticated user.
-     * 
-     * @authenticated
-     * @queryParam type string Filter by message type (received,sent). Example: received
-     * @queryParam batch_id string Filter by batch ID. Example: "uuid-string"
-     * @queryParam is_read boolean Filter by read status. Example: false
-     * @queryParam per_page integer Number of messages per page (max 50). Example: 20
-     * 
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "message_id": "uuid-string",
-     *       "subject": "Assignment Deadline Reminder",
-     *       "message_body": "Don't forget to submit your HTML project by Friday.",
-     *       "sender": {
-     *         "user_id": "uuid-string",
-     *         "first_name": "John",
-     *         "last_name": "Instructor",
-     *         "email": "john@example.com",
-     *         "profile_picture": "path/to/image.jpg"
-     *       },
-     *       "batch": {
-     *         "batch_id": "uuid-string",
-     *         "batch_name": "Web Dev Batch 2024-A",
-     *         "course_title": "Web Development Fundamentals"
-     *       },
-     *       "is_read": false,
-     *       "sent_at": "2024-01-20T14:30:00Z",
-     *       "read_at": null
-     *     }
-     *   ],
-     *   "pagination": {
-     *     "current_page": 1,
-     *     "per_page": 20,
-     *     "total": 45,
-     *     "last_page": 3
-     *   }
-     * }
+     * @OA\Get(
+     *     path="/api/user/messages",
+     *     tags={"User Messaging"},
+     *     summary="Get user messages",
+     *     description="Get all messages for the authenticated user",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="type",
+     *         in="query",
+     *         description="Filter by message type",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"received", "sent"}, example="received")
+     *     ),
+     *     @OA\Parameter(
+     *         name="batch_id",
+     *         in="query",
+     *         description="Filter by batch ID",
+     *         required=false,
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="is_read",
+     *         in="query",
+     *         description="Filter by read status",
+     *         required=false,
+     *         @OA\Schema(type="boolean", example=false)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of messages per page (max 50)",
+     *         required=false,
+     *         @OA\Schema(type="integer", minimum=1, maximum=50, example=20)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User messages retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="message_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="subject", type="string", example="Assignment Deadline Reminder"),
+     *                     @OA\Property(property="content", type="string", example="Don't forget to submit your HTML project by Friday."),
+     *                     @OA\Property(
+     *                         property="sender",
+     *                         type="object",
+     *                         @OA\Property(property="user_id", type="string", example="uuid-string"),
+     *                         @OA\Property(property="first_name", type="string", example="John"),
+     *                         @OA\Property(property="last_name", type="string", example="Instructor"),
+     *                         @OA\Property(property="email", type="string", example="john@example.com"),
+     *                         @OA\Property(property="profile_picture", type="string", example="path/to/image.jpg")
+     *                     ),
+     *                     @OA\Property(
+     *                         property="batch",
+     *                         type="object",
+     *                         @OA\Property(property="batch_id", type="string", example="uuid-string"),
+     *                         @OA\Property(property="batch_name", type="string", example="Web Dev Batch 2024-A"),
+     *                         @OA\Property(property="course_title", type="string", example="Web Development Fundamentals")
+     *                     ),
+     *                     @OA\Property(property="is_read", type="boolean", example=false),
+     *                     @OA\Property(property="sent_at", type="string", format="date-time", example="2024-01-20T14:30:00Z"),
+     *                     @OA\Property(property="read_at", type="string", format="date-time", nullable=true, example=null)
+     *                 )
+     *             ),
+     *             @OA\Property(
+     *                 property="pagination",
+     *                 type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="per_page", type="integer", example=20),
+     *                 @OA\Property(property="total", type="integer", example=45),
+     *                 @OA\Property(property="last_page", type="integer", example=3)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function index(Request $request): JsonResponse
     {
@@ -116,40 +162,87 @@ class MessageController extends Controller
     }
 
     /**
-     * Send message
-     * 
-     * Send a message to another user in the same batch.
-     * 
-     * @authenticated
-     * @bodyParam recipient_id string required Recipient user ID.
-     * @bodyParam batch_id string required Batch context for the message.
-     * @bodyParam subject string required Message subject.
-     * @bodyParam message_body string required Message content.
-     * 
-     * @response 201 {
-     *   "data": {
-     *     "message_id": "uuid-string",
-     *     "subject": "Question about Assignment",
-     *     "message_body": "I need help with the CSS flexbox exercise.",
-     *     "recipient": {
-     *       "user_id": "uuid-string",
-     *       "first_name": "Jane",
-     *       "last_name": "Student",
-     *       "email": "jane@example.com"
-     *     },
-     *     "batch": {
-     *       "batch_id": "uuid-string",
-     *       "batch_name": "Web Dev Batch 2024-A"
-     *     },
-     *     "sent_at": "2024-01-20T16:30:00Z"
-     *   },
-     *   "message": "Message sent successfully"
-     * }
-     * 
-     * @response 403 {
-     *   "message": "Cannot send message",
-     *   "errors": ["Recipient not in the same batch"]
-     * }
+     * @OA\Post(
+     *     path="/api/user/messages",
+     *     tags={"User Messaging"},
+     *     summary="Send a message",
+     *     description="Send a message to another user in the same batch",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"recipient_id", "batch_id", "subject", "content"},
+     *             @OA\Property(property="recipient_id", type="string", description="Recipient user ID", example="uuid-string"),
+     *             @OA\Property(property="batch_id", type="string", description="Batch context for the message", example="uuid-string"),
+     *             @OA\Property(property="subject", type="string", description="Message subject", maxLength=255, example="Question about Assignment"),
+     *             @OA\Property(property="content", type="string", description="Message content", maxLength=2000, example="I need help with the CSS flexbox exercise.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Message sent successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="message_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="subject", type="string", example="Question about Assignment"),
+     *                 @OA\Property(property="content", type="string", example="I need help with the CSS flexbox exercise."),
+     *                 @OA\Property(
+     *                     property="recipient",
+     *                     type="object",
+     *                     @OA\Property(property="user_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="first_name", type="string", example="Jane"),
+     *                     @OA\Property(property="last_name", type="string", example="Student"),
+     *                     @OA\Property(property="email", type="string", example="jane@example.com")
+     *                 ),
+     *                 @OA\Property(
+     *                     property="batch",
+     *                     type="object",
+     *                     @OA\Property(property="batch_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="batch_name", type="string", example="Web Dev Batch 2024-A")
+     *                 ),
+     *                 @OA\Property(property="sent_at", type="string", format="date-time", example="2024-01-20T16:30:00Z")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Message sent successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Cannot send message",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Cannot send message"),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="array",
+     *                 @OA\Items(type="string", example="Recipient not in the same batch")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation errors",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="recipient_id",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The recipient id field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function store(Request $request): JsonResponse
     {
@@ -157,7 +250,7 @@ class MessageController extends Controller
             'recipient_id' => 'required|exists:users,user_id',
             'batch_id' => 'required|exists:course_batches,batch_id',
             'subject' => 'required|string|max:255',
-            'message_body' => 'required|string|max:2000'
+            'content' => 'required|string|max:2000'
         ]);
 
         // Verify sender is enrolled in the batch
@@ -192,7 +285,7 @@ class MessageController extends Controller
             'recipient_id' => $request->recipient_id,
             'batch_id' => $request->batch_id,
             'subject' => $request->subject,
-            'message_body' => $request->message_body,
+            'content' => $request->content,
             'sent_at' => now()
         ]);
 
@@ -208,16 +301,41 @@ class MessageController extends Controller
     }
 
     /**
-     * Mark message as read
-     * 
-     * Mark a received message as read.
-     * 
-     * @authenticated
-     * @urlParam message_id string required The message ID. Example: "uuid-string"
-     * 
-     * @response 200 {
-     *   "message": "Message marked as read"
-     * }
+     * @OA\Patch(
+     *     path="/api/user/messages/{message_id}/read",
+     *     tags={"User Messaging"},
+     *     summary="Mark message as read",
+     *     description="Mark a received message as read",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="message_id",
+     *         in="path",
+     *         description="The message ID",
+     *         required=true,
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Message marked as read successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Message marked as read")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Message not found or already read",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Message not found or already read")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function markAsRead(string $message_id): JsonResponse
     {
@@ -240,47 +358,83 @@ class MessageController extends Controller
     }
 
     /**
-     * Get forum topics
-     * 
-     * Get forum topics for user's enrolled batches.
-     * 
-     * @authenticated
-     * @queryParam batch_id string Filter by batch ID. Example: "uuid-string"
-     * @queryParam per_page integer Number of topics per page (max 50). Example: 20
-     * 
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "topic_id": "uuid-string",
-     *       "title": "Discussion: CSS Grid vs Flexbox",
-     *       "description": "Let's discuss when to use CSS Grid vs Flexbox",
-     *       "author": {
-     *         "user_id": "uuid-string",
-     *         "first_name": "John",
-     *         "last_name": "Instructor",
-     *         "email": "john@example.com"
-     *       },
-     *       "batch": {
-     *         "batch_id": "uuid-string",
-     *         "batch_name": "Web Dev Batch 2024-A"
-     *       },
-     *       "replies_count": 12,
-     *       "latest_reply": {
-     *         "reply_id": "uuid-string",
-     *         "author_name": "Jane Student",
-     *         "created_at": "2024-01-20T15:30:00Z"
-     *       },
-     *       "created_at": "2024-01-19T10:00:00Z",
-     *       "is_pinned": false
-     *     }
-     *   ],
-     *   "pagination": {
-     *     "current_page": 1,
-     *     "per_page": 20,
-     *     "total": 25,
-     *     "last_page": 2
-     *   }
-     * }
+     * @OA\Get(
+     *     path="/api/user/forum/topics",
+     *     tags={"User Messaging"},
+     *     summary="Get forum topics",
+     *     description="Get forum topics for user's enrolled batches",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="batch_id",
+     *         in="query",
+     *         description="Filter by batch ID",
+     *         required=false,
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of topics per page (max 50)",
+     *         required=false,
+     *         @OA\Schema(type="integer", minimum=1, maximum=50, example=20)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Forum topics retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="topic_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="title", type="string", example="Discussion: CSS Grid vs Flexbox"),
+     *                     @OA\Property(property="description", type="string", example="Let's discuss when to use CSS Grid vs Flexbox"),
+     *                     @OA\Property(
+     *                         property="author",
+     *                         type="object",
+     *                         @OA\Property(property="user_id", type="string", example="uuid-string"),
+     *                         @OA\Property(property="first_name", type="string", example="John"),
+     *                         @OA\Property(property="last_name", type="string", example="Instructor"),
+     *                         @OA\Property(property="email", type="string", example="john@example.com")
+     *                     ),
+     *                     @OA\Property(
+     *                         property="batch",
+     *                         type="object",
+     *                         @OA\Property(property="batch_id", type="string", example="uuid-string"),
+     *                         @OA\Property(property="batch_name", type="string", example="Web Dev Batch 2024-A")
+     *                     ),
+     *                     @OA\Property(property="replies_count", type="integer", example=12),
+     *                     @OA\Property(
+     *                         property="latest_reply",
+     *                         type="object",
+     *                         nullable=true,
+     *                         @OA\Property(property="reply_id", type="string", example="uuid-string"),
+     *                         @OA\Property(property="author_name", type="string", example="Jane Student"),
+     *                         @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-20T15:30:00Z")
+     *                     ),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-19T10:00:00Z"),
+     *                     @OA\Property(property="is_pinned", type="boolean", example=false)
+     *                 )
+     *             ),
+     *             @OA\Property(
+     *                 property="pagination",
+     *                 type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="per_page", type="integer", example=20),
+     *                 @OA\Property(property="total", type="integer", example=25),
+     *                 @OA\Property(property="last_page", type="integer", example=2)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function getForumTopics(Request $request): JsonResponse
     {
@@ -337,33 +491,80 @@ class MessageController extends Controller
     }
 
     /**
-     * Create forum topic
-     * 
-     * Create a new forum topic in a batch.
-     * 
-     * @authenticated
-     * @bodyParam batch_id string required Batch ID where topic will be created.
-     * @bodyParam title string required Topic title.
-     * @bodyParam description string required Topic description/content.
-     * 
-     * @response 201 {
-     *   "data": {
-     *     "topic_id": "uuid-string",
-     *     "title": "Need Help with JavaScript Arrays",
-     *     "description": "I'm struggling with array methods. Can someone explain map() vs forEach()?",
-     *     "author": {
-     *       "user_id": "uuid-string",
-     *       "first_name": "Jane",
-     *       "last_name": "Student"
-     *     },
-     *     "batch": {
-     *       "batch_id": "uuid-string",
-     *       "batch_name": "Web Dev Batch 2024-A"
-     *     },
-     *     "created_at": "2024-01-20T16:45:00Z"
-     *   },
-     *   "message": "Forum topic created successfully"
-     * }
+     * @OA\Post(
+     *     path="/api/user/forum/topics",
+     *     tags={"User Messaging"},
+     *     summary="Create forum topic",
+     *     description="Create a new forum topic in a batch",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"batch_id", "title", "description"},
+     *             @OA\Property(property="batch_id", type="string", description="Batch ID where topic will be created", example="uuid-string"),
+     *             @OA\Property(property="title", type="string", description="Topic title", maxLength=255, example="Need Help with JavaScript Arrays"),
+     *             @OA\Property(property="description", type="string", description="Topic description/content", maxLength=2000, example="I'm struggling with array methods. Can someone explain map() vs forEach()?")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Forum topic created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="topic_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="title", type="string", example="Need Help with JavaScript Arrays"),
+     *                 @OA\Property(property="description", type="string", example="I'm struggling with array methods. Can someone explain map() vs forEach()?"),
+     *                 @OA\Property(
+     *                     property="author",
+     *                     type="object",
+     *                     @OA\Property(property="user_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="first_name", type="string", example="Jane"),
+     *                     @OA\Property(property="last_name", type="string", example="Student")
+     *                 ),
+     *                 @OA\Property(
+     *                     property="batch",
+     *                     type="object",
+     *                     @OA\Property(property="batch_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="batch_name", type="string", example="Web Dev Batch 2024-A")
+     *                 ),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-20T16:45:00Z")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Forum topic created successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Not enrolled in batch",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="You are not enrolled in this batch")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation errors",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="title",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The title field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function createForumTopic(Request $request): JsonResponse
     {
@@ -405,49 +606,100 @@ class MessageController extends Controller
     }
 
     /**
-     * Get forum topic with replies
-     * 
-     * Get a specific forum topic with all its replies.
-     * 
-     * @authenticated
-     * @urlParam topic_id string required The topic ID. Example: "uuid-string"
-     * @queryParam per_page integer Number of replies per page (max 50). Example: 20
-     * 
-     * @response 200 {
-     *   "data": {
-     *     "topic": {
-     *       "topic_id": "uuid-string",
-     *       "title": "Discussion: CSS Grid vs Flexbox",
-     *       "description": "Let's discuss when to use CSS Grid vs Flexbox",
-     *       "author": {
-     *         "user_id": "uuid-string",
-     *         "first_name": "John",
-     *         "last_name": "Instructor",
-     *         "email": "john@example.com"
-     *       },
-     *       "created_at": "2024-01-19T10:00:00Z"
-     *     },
-     *     "replies": [
-     *       {
-     *         "reply_id": "uuid-string",
-     *         "reply_text": "I think CSS Grid is better for 2D layouts...",
-     *         "author": {
-     *           "user_id": "uuid-string",
-     *           "first_name": "Jane",
-     *           "last_name": "Student",
-     *           "profile_picture": "path/to/image.jpg"
-     *         },
-     *         "created_at": "2024-01-19T14:30:00Z"
-     *       }
-     *     ],
-     *     "pagination": {
-     *       "current_page": 1,
-     *       "per_page": 20,
-     *       "total": 12,
-     *       "last_page": 1
-     *     }
-     *   }
-     * }
+     * @OA\Get(
+     *     path="/api/user/forum/topics/{topic_id}",
+     *     tags={"User Messaging"},
+     *     summary="Get forum topic with replies",
+     *     description="Get a specific forum topic with all its replies",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="topic_id",
+     *         in="path",
+     *         description="The topic ID",
+     *         required=true,
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of replies per page (max 50)",
+     *         required=false,
+     *         @OA\Schema(type="integer", minimum=1, maximum=50, example=20)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Forum topic with replies retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="topic",
+     *                     type="object",
+     *                     @OA\Property(property="topic_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="title", type="string", example="Discussion: CSS Grid vs Flexbox"),
+     *                     @OA\Property(property="description", type="string", example="Let's discuss when to use CSS Grid vs Flexbox"),
+     *                     @OA\Property(
+     *                         property="author",
+     *                         type="object",
+     *                         @OA\Property(property="user_id", type="string", example="uuid-string"),
+     *                         @OA\Property(property="first_name", type="string", example="John"),
+     *                         @OA\Property(property="last_name", type="string", example="Instructor"),
+     *                         @OA\Property(property="email", type="string", example="john@example.com")
+     *                     ),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-19T10:00:00Z")
+     *                 ),
+     *                 @OA\Property(
+     *                     property="replies",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="reply_id", type="string", example="uuid-string"),
+     *                         @OA\Property(property="reply_text", type="string", example="I think CSS Grid is better for 2D layouts..."),
+     *                         @OA\Property(
+     *                             property="author",
+     *                             type="object",
+     *                             @OA\Property(property="user_id", type="string", example="uuid-string"),
+     *                             @OA\Property(property="first_name", type="string", example="Jane"),
+     *                             @OA\Property(property="last_name", type="string", example="Student"),
+     *                             @OA\Property(property="profile_picture", type="string", example="path/to/image.jpg")
+     *                         ),
+     *                         @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-19T14:30:00Z")
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="pagination",
+     *                     type="object",
+     *                     @OA\Property(property="current_page", type="integer", example=1),
+     *                     @OA\Property(property="per_page", type="integer", example=20),
+     *                     @OA\Property(property="total", type="integer", example=12),
+     *                     @OA\Property(property="last_page", type="integer", example=1)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Access denied",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Access denied")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Topic not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\BatchForumTopic]")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function getForumTopic(Request $request, string $topic_id): JsonResponse
     {
@@ -498,27 +750,85 @@ class MessageController extends Controller
     }
 
     /**
-     * Reply to forum topic
-     * 
-     * Add a reply to a forum topic.
-     * 
-     * @authenticated
-     * @urlParam topic_id string required The topic ID. Example: "uuid-string"
-     * @bodyParam reply_text string required Reply content.
-     * 
-     * @response 201 {
-     *   "data": {
-     *     "reply_id": "uuid-string",
-     *     "reply_text": "Great explanation! I agree that Grid is perfect for complex layouts.",
-     *     "author": {
-     *       "user_id": "uuid-string",
-     *       "first_name": "Mike",
-     *       "last_name": "Student"
-     *     },
-     *     "created_at": "2024-01-20T17:00:00Z"
-     *   },
-     *   "message": "Reply added successfully"
-     * }
+     * @OA\Post(
+     *     path="/api/user/forum/topics/{topic_id}/replies",
+     *     tags={"User Messaging"},
+     *     summary="Reply to forum topic",
+     *     description="Add a reply to a forum topic",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="topic_id",
+     *         in="path",
+     *         description="The topic ID",
+     *         required=true,
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"reply_text"},
+     *             @OA\Property(property="reply_text", type="string", description="Reply content", maxLength=2000, example="Great explanation! I agree that Grid is perfect for complex layouts.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Reply added successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="reply_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="reply_text", type="string", example="Great explanation! I agree that Grid is perfect for complex layouts."),
+     *                 @OA\Property(
+     *                     property="author",
+     *                     type="object",
+     *                     @OA\Property(property="user_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="first_name", type="string", example="Mike"),
+     *                     @OA\Property(property="last_name", type="string", example="Student")
+     *                 ),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-20T17:00:00Z")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Reply added successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Access denied",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Access denied")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Topic not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="No query results for model [App\\Models\\BatchForumTopic]")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation errors",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="reply_text",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The reply text field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function replyToTopic(Request $request, string $topic_id): JsonResponse
     {

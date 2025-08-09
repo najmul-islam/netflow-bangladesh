@@ -8,39 +8,50 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
- * @group Public API - Categories
- * 
- * Public endpoints for browsing course categories
+ * @OA\Tag(
+ *     name="Public Categories",
+ *     description="Public endpoints for browsing course categories"
+ * )
  */
 class CategoryController extends Controller
 {
     /**
-     * List all categories
-     * 
-     * Get a list of all course categories with course counts.
-     * 
-     * @queryParam include_empty boolean Include categories with no courses. Example: false
-     * 
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "category_id": "uuid-string",
-     *       "name": "Programming",
-     *       "description": "Learn programming languages and frameworks",
-     *       "slug": "programming",
-     *       "icon_url": "https://example.com/icon.png",
-     *       "color": "#3B82F6",
-     *       "is_active": true,
-     *       "courses_count": 15,
-     *       "created_at": "2024-01-01T00:00:00Z"
-     *     }
-     *   ]
-     * }
+     * @OA\Get(
+     *     path="/api/public/categories",
+     *     tags={"Public Categories"},
+     *     summary="List all categories",
+     *     description="Get a list of all course categories with course counts",
+     *     @OA\Parameter(
+     *         name="include_empty",
+     *         in="query",
+     *         description="Include categories with no courses",
+     *         required=false,
+     *         @OA\Schema(type="boolean", example=false)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="category_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="name", type="string", example="Programming"),
+     *                     @OA\Property(property="description", type="string", example="Learn programming languages and frameworks"),
+     *                     @OA\Property(property="slug", type="string", example="programming"),
+     *                     @OA\Property(property="icon", type="string", example="icon.png"),
+     *                     @OA\Property(property="is_active", type="boolean", example=true),
+     *                     @OA\Property(property="courses_count", type="integer", example=15),
+     *                     @OA\Property(property="created_at", type="string", example="2024-01-01T00:00:00Z")
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
      */
     public function index(Request $request): JsonResponse
     {
         $query = Category::withCount(['courses as courses_count' => function ($query) {
-            $query->where('is_published', true);
+            $query->where('status', 'published');
         }])
         ->where('is_active', true)
         ->orderBy('name');
@@ -80,8 +91,8 @@ class CategoryController extends Controller
      *         "thumbnail_url": "https://example.com/thumb.jpg",
      *         "price": 89.99,
      *         "currency": "USD",
-     *         "level": "beginner",
-     *         "duration_hours": 25,
+     *         "difficulty_level": "beginner",
+     *         "estimated_duration_hours": 25,
      *         "instructor_count": 1,
      *         "batch_count": 3
      *       }
@@ -112,11 +123,11 @@ class CategoryController extends Controller
         // Get paginated courses
         $perPage = min($request->get('per_page', 10), 20);
         $courses = $category->courses()
-            ->where('is_published', true)
+            ->where('status', 'published')
             ->withCount(['instructors as instructor_count', 'batches as batch_count'])
             ->select([
                 'course_id', 'title', 'short_description', 'thumbnail_url', 
-                'price', 'currency', 'level', 'duration_hours'
+                'price', 'currency', 'difficulty_level', 'estimated_duration_hours'
             ])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);

@@ -11,9 +11,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 /**
- * @group User API - Payments
- * 
- * Endpoints for managing payments and course purchases (requires authentication)
+ * @OA\Tag(
+ *     name="User Payments",
+ *     description="Endpoints for managing payments and course purchases (requires authentication)"
+ * )
  */
 class PaymentController extends Controller
 {
@@ -23,31 +24,58 @@ class PaymentController extends Controller
     }
 
     /**
-     * Get user payment history
-     * 
-     * Get all payments made by the authenticated user.
-     * 
-     * @authenticated
-     * @queryParam status string Filter by payment status (initiated,processing,completed,failed,refunded). Example: completed
-     * @queryParam method string Filter by payment method (card,mobile_banking,bank_transfer). Example: card
-     * @queryParam per_page integer Number of payments per page (max 50). Example: 20
-     * 
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "payment_id": "uuid-string",
-     *       "amount": 5000.00,
-     *       "currency": "BDT",
-     *       "method": "card",
-     *       "transaction_id": "TXN123456789",
-     *       "status": "completed",
-     *       "paid_at": "2024-01-20T14:30:00Z",
-     *       "orders": [
-     *         {
-     *           "order_id": "uuid-string",
-     *           "total_amount": 5000.00,
-     *           "status": "confirmed",
-     *           "items": [
+     * @OA\Get(
+     *     path="/api/user/payments",
+     *     tags={"User Payments"},
+     *     summary="Get user payment history",
+     *     description="Get all payments made by the authenticated user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Filter by payment status",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"initiated","processing","completed","failed","refunded"}, example="completed")
+     *     ),
+     *     @OA\Parameter(
+     *         name="method",
+     *         in="query",
+     *         description="Filter by payment method",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"card","mobile_banking","bank_transfer"}, example="card")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of payments per page (max 50)",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=20)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Payment history",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="payment_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="amount", type="number", example=5000.00),
+     *                     @OA\Property(property="currency", type="string", example="BDT"),
+     *                     @OA\Property(property="method", type="string", example="card"),
+     *                     @OA\Property(property="transaction_id", type="string", example="TXN123456789"),
+     *                     @OA\Property(property="status", type="string", example="completed"),
+     *                     @OA\Property(property="paid_at", type="string", example="2024-01-20T14:30:00Z")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     )
+     * )
      *             {
      *               "product_id": "uuid-string",
      *               "product_title": "Web Development Course",
@@ -106,40 +134,85 @@ class PaymentController extends Controller
     }
 
     /**
-     * Initiate course payment
-     * 
-     * Start a new payment for course enrollment.
-     * 
-     * @authenticated
-     * @bodyParam batch_id string required Batch ID to enroll in.
-     * @bodyParam payment_method string required Payment method (card,mobile_banking,bank_transfer).
-     * @bodyParam return_url string Return URL after payment completion.
-     * @bodyParam cancel_url string Cancel URL if payment is cancelled.
-     * 
-     * @response 201 {
-     *   "data": {
-     *     "payment_id": "uuid-string",
-     *     "order_id": "uuid-string",
-     *     "amount": 5000.00,
-     *     "currency": "BDT",
-     *     "method": "card",
-     *     "status": "initiated",
-     *     "payment_url": "https://payment-gateway.com/pay/uuid-string",
-     *     "expires_at": "2024-01-20T15:00:00Z",
-     *     "batch": {
-     *       "batch_id": "uuid-string",
-     *       "batch_name": "Web Dev Batch 2024-A",
-     *       "course_title": "Web Development Fundamentals",
-     *       "price": 5000.00
-     *     }
-     *   },
-     *   "message": "Payment initiated successfully"
-     * }
-     * 
-     * @response 400 {
-     *   "message": "Cannot initiate payment",
-     *   "errors": ["Batch is full", "Already enrolled", "Batch not available"]
-     * }
+     * @OA\Post(
+     *     path="/api/user/payments/course",
+     *     tags={"User Payments"},
+     *     summary="Initiate course payment",
+     *     description="Start a new payment for course enrollment",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"batch_id", "payment_method"},
+     *             @OA\Property(property="batch_id", type="string", description="Batch ID to enroll in", example="uuid-string"),
+     *             @OA\Property(property="payment_method", type="string", description="Payment method", enum={"card", "mobile_banking", "bank_transfer"}, example="card"),
+     *             @OA\Property(property="return_url", type="string", description="Return URL after payment completion", example="https://example.com/payment/success"),
+     *             @OA\Property(property="cancel_url", type="string", description="Cancel URL if payment is cancelled", example="https://example.com/payment/cancel")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Payment initiated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="payment_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="order_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="amount", type="number", format="float", example=5000.00),
+     *                 @OA\Property(property="currency", type="string", example="BDT"),
+     *                 @OA\Property(property="method", type="string", example="card"),
+     *                 @OA\Property(property="status", type="string", example="initiated"),
+     *                 @OA\Property(property="payment_url", type="string", example="https://payment-gateway.com/pay/uuid-string"),
+     *                 @OA\Property(property="expires_at", type="string", format="date-time", example="2024-01-20T15:00:00Z"),
+     *                 @OA\Property(
+     *                     property="batch",
+     *                     type="object",
+     *                     @OA\Property(property="batch_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="batch_name", type="string", example="Web Dev Batch 2024-A"),
+     *                     @OA\Property(property="course_title", type="string", example="Web Development Fundamentals"),
+     *                     @OA\Property(property="price", type="number", format="float", example=5000.00)
+     *                 )
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Payment initiated successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Cannot initiate payment",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Cannot initiate payment"),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="array",
+     *                 @OA\Items(type="string", example="Batch is full")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation errors",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="batch_id",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The batch id field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function initiateCoursePayment(Request $request): JsonResponse
     {
@@ -258,24 +331,59 @@ class PaymentController extends Controller
     }
 
     /**
-     * Payment callback/webhook
-     * 
-     * Handle payment gateway callback to update payment status.
-     * 
-     * @bodyParam payment_id string required Payment ID.
-     * @bodyParam transaction_id string required Transaction ID from gateway.
-     * @bodyParam status string required Payment status (completed,failed).
-     * @bodyParam signature string required Payment gateway signature for verification.
-     * 
-     * @response 200 {
-     *   "message": "Payment processed successfully",
-     *   "data": {
-     *     "payment_id": "uuid-string",
-     *     "status": "completed",
-     *     "enrollment_status": "active"
-     *   }
-     * }
-     */
+     * @OA\Post(
+     *     path="/api/user/payments/callback",
+     *     tags={"User Payments"},
+     *     summary="Payment callback/webhook",
+     *     description="Handle payment gateway callback to update payment status",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"payment_id", "transaction_id", "status", "signature"},
+     *             @OA\Property(property="payment_id", type="string", description="Payment ID", example="uuid-string"),
+     *             @OA\Property(property="transaction_id", type="string", description="Transaction ID from gateway", example="TXN123456789"),
+     *             @OA\Property(property="status", type="string", description="Payment status", enum={"completed", "failed"}, example="completed"),
+     *             @OA\Property(property="signature", type="string", description="Payment gateway signature for verification", example="signature-hash")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Payment processed successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Payment processed successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="payment_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="status", type="string", example="completed"),
+     *                 @OA\Property(property="enrollment_status", type="string", example="active")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid signature or payment not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid signature")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation errors",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="payment_id",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The payment id field is required.")
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
     public function handleCallback(Request $request): JsonResponse
     {
         $request->validate([

@@ -9,9 +9,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
- * @group User API - Reviews
- * 
- * Endpoints for managing course reviews (requires authentication)
+ * @OA\Tag(
+ *     name="User Reviews",
+ *     description="Endpoints for managing course reviews (requires authentication)"
+ * )
  */
 class ReviewController extends Controller
 {
@@ -21,13 +22,41 @@ class ReviewController extends Controller
     }
 
     /**
-     * Get user reviews
-     * 
-     * Get all reviews submitted by the authenticated user.
-     * 
-     * @authenticated
-     * @queryParam per_page integer Number of reviews per page (max 50). Example: 20
-     * 
+     * @OA\Get(
+     *     path="/api/user/reviews",
+     *     tags={"User Reviews"},
+     *     summary="Get user reviews",
+     *     description="Get all reviews submitted by the authenticated user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of reviews per page (max 50)",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=20)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User reviews",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="review_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="rating", type="integer", example=5),
+     *                     @OA\Property(property="review_text", type="string", example="Excellent course content and teaching"),
+     *                     @OA\Property(property="created_at", type="string", example="2024-01-20T10:00:00Z")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     )
+     * )
      * @response 200 {
      *   "data": [
      *     {
@@ -84,40 +113,87 @@ class ReviewController extends Controller
     }
 
     /**
-     * Submit course review
-     * 
-     * Submit a review for a completed course batch.
-     * 
-     * @authenticated
-     * @bodyParam batch_id string required Batch ID to review.
-     * @bodyParam rating integer required Rating from 1-5.
-     * @bodyParam review_text string required Review content.
-     * @bodyParam is_public boolean Make review public (default: true).
-     * 
-     * @response 201 {
-     *   "data": {
-     *     "review_id": "uuid-string",
-     *     "batch_id": "uuid-string",
-     *     "rating": 5,
-     *     "review_text": "Amazing course! The instructor was very knowledgeable.",
-     *     "is_public": true,
-     *     "batch": {
-     *       "batch_id": "uuid-string",
-     *       "batch_name": "Web Dev Batch 2024-A",
-     *       "course": {
-     *         "course_id": "uuid-string",
-     *         "title": "Web Development Fundamentals"
-     *       }
-     *     },
-     *     "created_at": "2024-01-20T16:00:00Z"
-     *   },
-     *   "message": "Review submitted successfully"
-     * }
-     * 
-     * @response 400 {
-     *   "message": "Cannot submit review",
-     *   "errors": ["Not enrolled in this batch", "Batch not completed", "Review already exists"]
-     * }
+     * @OA\Post(
+     *     path="/api/user/reviews",
+     *     tags={"User Reviews"},
+     *     summary="Submit course review",
+     *     description="Submit a review for a completed course batch",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"batch_id", "rating", "review_text"},
+     *             @OA\Property(property="batch_id", type="string", description="Batch ID to review", example="uuid-string"),
+     *             @OA\Property(property="rating", type="integer", description="Rating from 1-5", minimum=1, maximum=5, example=5),
+     *             @OA\Property(property="review_text", type="string", description="Review content", maxLength=1000, example="Amazing course! The instructor was very knowledgeable."),
+     *             @OA\Property(property="is_public", type="boolean", description="Make review public", example=true)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Review submitted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="review_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="batch_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="rating", type="integer", example=5),
+     *                 @OA\Property(property="review_text", type="string", example="Amazing course! The instructor was very knowledgeable."),
+     *                 @OA\Property(property="is_public", type="boolean", example=true),
+     *                 @OA\Property(
+     *                     property="batch",
+     *                     type="object",
+     *                     @OA\Property(property="batch_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="batch_name", type="string", example="Web Dev Batch 2024-A"),
+     *                     @OA\Property(
+     *                         property="course",
+     *                         type="object",
+     *                         @OA\Property(property="course_id", type="string", example="uuid-string"),
+     *                         @OA\Property(property="title", type="string", example="Web Development Fundamentals")
+     *                     )
+     *                 ),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-20T16:00:00Z")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Review submitted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Cannot submit review",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Cannot submit review"),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="array",
+     *                 @OA\Items(type="string", example="Not enrolled in this batch")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation errors",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="rating",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The rating field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function store(Request $request): JsonResponse
     {
@@ -181,26 +257,65 @@ class ReviewController extends Controller
     }
 
     /**
-     * Update review
-     * 
-     * Update an existing review.
-     * 
-     * @authenticated
-     * @urlParam review_id string required The review ID. Example: "uuid-string"
-     * @bodyParam rating integer Rating from 1-5.
-     * @bodyParam review_text string Review content.
-     * @bodyParam is_public boolean Make review public.
-     * 
-     * @response 200 {
-     *   "data": {
-     *     "review_id": "uuid-string",
-     *     "rating": 4,
-     *     "review_text": "Updated review text",
-     *     "is_public": true,
-     *     "updated_at": "2024-01-20T17:00:00Z"
-     *   },
-     *   "message": "Review updated successfully"
-     * }
+     * @OA\Patch(
+     *     path="/api/user/reviews/{review_id}",
+     *     tags={"User Reviews"},
+     *     summary="Update review",
+     *     description="Update an existing review",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="review_id",
+     *         in="path",
+     *         description="The review ID",
+     *         required=true,
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="rating", type="integer", description="Rating from 1-5", minimum=1, maximum=5, example=4),
+     *             @OA\Property(property="review_text", type="string", description="Review content", maxLength=1000, example="Updated review text"),
+     *             @OA\Property(property="is_public", type="boolean", description="Make review public", example=true)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Review updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="review_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="rating", type="integer", example=4),
+     *                 @OA\Property(property="review_text", type="string", example="Updated review text"),
+     *                 @OA\Property(property="is_public", type="boolean", example=true),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2024-01-20T17:00:00Z")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Review updated successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Review not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Review not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized to update this review",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthorized")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function update(Request $request, string $review_id): JsonResponse
     {

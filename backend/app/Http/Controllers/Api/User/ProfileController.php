@@ -12,9 +12,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 
 /**
- * @group User API - Profile
- * 
- * Endpoints for managing user profile (requires authentication)
+ * @OA\Tag(
+ *     name="User Profile",
+ *     description="Endpoints for managing user profile (requires authentication)"
+ * )
  */
 class ProfileController extends Controller
 {
@@ -24,56 +25,39 @@ class ProfileController extends Controller
     }
 
     /**
-     * Get user profile
-     * 
-     * Get the authenticated user's complete profile information.
-     * 
-     * @authenticated
-     * 
-     * @response 200 {
-     *   "data": {
-     *     "user_id": "uuid-string",
-     *     "first_name": "John",
-     *     "last_name": "Doe",
-     *     "email": "john@example.com",
-     *     "phone": "+8801234567890",
-     *     "date_of_birth": "1995-05-15",
-     *     "gender": "male",
-     *     "profile_picture": "https://example.com/storage/profiles/user.jpg",
-     *     "bio": "Passionate web developer learning new technologies",
-     *     "timezone": "Asia/Dhaka",
-     *     "language": "en",
-     *     "notification_preferences": {
-     *       "email": true,
-     *       "push": true,
-     *       "types": {
-     *         "announcement": true,
-     *         "assignment": true,
-     *         "assessment": true
-     *       }
-     *     },
-     *     "addresses": [
-     *       {
-     *         "address_id": "uuid-string",
-     *         "address_type": "home",
-     *         "street_address": "123 Main Street",
-     *         "city": "Dhaka",
-     *         "state": "Dhaka",
-     *         "postal_code": "1000",
-     *         "country": "Bangladesh",
-     *         "is_primary": true
-     *       }
-     *     ],
-     *     "stats": {
-     *       "total_enrollments": 3,
-     *       "completed_courses": 1,
-     *       "certificates_earned": 1,
-     *       "total_study_hours": 45.5
-     *     },
-     *     "created_at": "2024-01-15T10:00:00Z",
-     *     "email_verified_at": "2024-01-15T10:30:00Z"
-     *   }
-     * }
+     * @OA\Get(
+     *     path="/api/user/profile",
+     *     tags={"User Profile"},
+     *     summary="Get user profile",
+     *     description="Get the authenticated user's complete profile information",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="User profile information",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="user_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="first_name", type="string", example="John"),
+     *                 @OA\Property(property="last_name", type="string", example="Doe"),
+     *                 @OA\Property(property="email", type="string", example="john@example.com"),
+     *                 @OA\Property(property="phone", type="string", example="+8801234567890"),
+     *                 @OA\Property(property="avatar_url", type="string", example="https://example.com/storage/profiles/user.jpg"),
+     *                 @OA\Property(property="bio", type="string", example="Passionate web developer learning new technologies"),
+     *                 @OA\Property(property="timezone", type="string", example="Asia/Dhaka"),
+     *                 @OA\Property(property="language", type="string", example="en"),
+     *                 @OA\Property(property="created_at", type="string", example="2024-01-15T10:00:00Z"),
+     *                 @OA\Property(property="email_verified", type="boolean", example=true)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     )
+     * )
      */
     public function show(): JsonResponse
     {
@@ -107,36 +91,57 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update user profile
-     * 
-     * Update the authenticated user's profile information.
-     * 
-     * @authenticated
-     * @bodyParam first_name string First name.
-     * @bodyParam last_name string Last name.
-     * @bodyParam phone string Phone number.
-     * @bodyParam date_of_birth date Date of birth (YYYY-MM-DD format).
-     * @bodyParam gender string Gender (male,female,other).
-     * @bodyParam bio string Bio/description.
-     * @bodyParam timezone string Timezone.
-     * @bodyParam language string Language preference.
-     * 
-     * @response 200 {
-     *   "data": {
-     *     "user_id": "uuid-string",
-     *     "first_name": "John",
-     *     "last_name": "Smith",
-     *     "email": "john@example.com",
-     *     "phone": "+8801234567890",
-     *     "date_of_birth": "1995-05-15",
-     *     "gender": "male",
-     *     "bio": "Updated bio description",
-     *     "timezone": "Asia/Dhaka",
-     *     "language": "en",
-     *     "updated_at": "2024-01-20T15:30:00Z"
-     *   },
-     *   "message": "Profile updated successfully"
-     * }
+     * @OA\Patch(
+     *     path="/api/user/profile",
+     *     tags={"User Profile"},
+     *     summary="Update user profile",
+     *     description="Update the authenticated user's profile information",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="first_name", type="string", example="John"),
+     *             @OA\Property(property="last_name", type="string", example="Doe"),
+     *             @OA\Property(property="phone", type="string", example="+8801234567890"),
+     *             @OA\Property(property="bio", type="string", example="Updated bio description"),
+     *             @OA\Property(property="timezone", type="string", example="Asia/Dhaka"),
+     *             @OA\Property(property="language", type="string", example="en")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Profile updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="user_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="first_name", type="string", example="John"),
+     *                 @OA\Property(property="last_name", type="string", example="Smith"),
+     *                 @OA\Property(property="email", type="string", example="john@example.com"),
+     *                 @OA\Property(property="phone", type="string", example="+8801234567890"),
+     *                 @OA\Property(property="bio", type="string", example="Updated bio description"),
+     *                 @OA\Property(property="timezone", type="string", example="Asia/Dhaka"),
+     *                 @OA\Property(property="language", type="string", example="en"),
+     *                 @OA\Property(property="updated_at", type="string", example="2024-01-20T15:30:00Z")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Profile updated successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The given data was invalid"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     )
+     * )
      */
     public function update(Request $request): JsonResponse
     {
@@ -181,19 +186,62 @@ class ProfileController extends Controller
     }
 
     /**
-     * Upload profile picture
-     * 
-     * Upload or update the user's profile picture.
-     * 
-     * @authenticated
-     * @bodyParam profile_picture file required Profile picture image (max 2MB, jpg/png).
-     * 
-     * @response 200 {
-     *   "data": {
-     *     "profile_picture": "https://example.com/storage/profiles/user-uuid.jpg"
-     *   },
-     *   "message": "Profile picture updated successfully"
-     * }
+     * @OA\Post(
+     *     path="/api/user/profile/upload-picture",
+     *     tags={"Profile"},
+     *     summary="Upload profile picture",
+     *     description="Upload or update the user's profile picture",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="avatar",
+     *                     type="string",
+     *                     format="binary",
+     *                     description="Profile picture image (max 2MB, jpg/png/jpeg)"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Profile picture uploaded successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="avatar_url", type="string", example="https://example.com/storage/avatars/user-uuid.jpg")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Avatar updated successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The avatar field is required."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="avatar",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The avatar field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function uploadProfilePicture(Request $request): JsonResponse
     {
@@ -223,22 +271,59 @@ class ProfileController extends Controller
     }
 
     /**
-     * Change password
-     * 
-     * Change the user's password.
-     * 
-     * @authenticated
-     * @bodyParam current_password string required Current password.
-     * @bodyParam new_password string required New password (min 8 characters).
-     * @bodyParam new_password_confirmation string required New password confirmation.
-     * 
-     * @response 200 {
-     *   "message": "Password changed successfully"
-     * }
-     * 
-     * @response 400 {
-     *   "message": "Invalid current password"
-     * }
+     * @OA\Post(
+     *     path="/api/user/profile/change-password",
+     *     tags={"Profile"},
+     *     summary="Change password",
+     *     description="Change the user's password",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"current_password", "new_password", "new_password_confirmation"},
+     *             @OA\Property(property="current_password", type="string", description="Current password"),
+     *             @OA\Property(property="new_password", type="string", description="New password (min 8 characters)"),
+     *             @OA\Property(property="new_password_confirmation", type="string", description="New password confirmation")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Password changed successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Password changed successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid current password",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid current password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The current password field is required."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="current_password",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The current password field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function changePassword(Request $request): JsonResponse
     {
@@ -265,27 +350,42 @@ class ProfileController extends Controller
     }
 
     /**
-     * Get user addresses
-     * 
-     * Get all addresses for the authenticated user.
-     * 
-     * @authenticated
-     * 
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "address_id": "uuid-string",
-     *       "address_type": "home",
-     *       "street_address": "123 Main Street",
-     *       "city": "Dhaka",
-     *       "state": "Dhaka",
-     *       "postal_code": "1000",
-     *       "country": "Bangladesh",
-     *       "is_primary": true,
-     *       "created_at": "2024-01-15T10:00:00Z"
-     *     }
-     *   ]
-     * }
+     * @OA\Get(
+     *     path="/api/user/profile/addresses",
+     *     tags={"Profile"},
+     *     summary="Get user addresses",
+     *     description="Get all addresses for the authenticated user",
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Addresses retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="address_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="address_type", type="string", example="home"),
+     *                     @OA\Property(property="street_address", type="string", example="123 Main Street"),
+     *                     @OA\Property(property="city", type="string", example="Dhaka"),
+     *                     @OA\Property(property="state", type="string", example="Dhaka"),
+     *                     @OA\Property(property="postal_code", type="string", example="1000"),
+     *                     @OA\Property(property="country", type="string", example="Bangladesh"),
+     *                     @OA\Property(property="is_primary", type="boolean", example=true),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-15T10:00:00Z")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function getAddresses(): JsonResponse
     {
@@ -298,33 +398,69 @@ class ProfileController extends Controller
     }
 
     /**
-     * Add new address
-     * 
-     * Add a new address for the user.
-     * 
-     * @authenticated
-     * @bodyParam address_type string required Address type (home,work,other).
-     * @bodyParam street_address string required Street address.
-     * @bodyParam city string required City.
-     * @bodyParam state string required State/Province.
-     * @bodyParam postal_code string required Postal code.
-     * @bodyParam country string required Country.
-     * @bodyParam is_primary boolean Set as primary address.
-     * 
-     * @response 201 {
-     *   "data": {
-     *     "address_id": "uuid-string",
-     *     "address_type": "home",
-     *     "street_address": "456 New Street",
-     *     "city": "Chittagong",
-     *     "state": "Chittagong",
-     *     "postal_code": "4000",
-     *     "country": "Bangladesh",
-     *     "is_primary": false,
-     *     "created_at": "2024-01-20T16:00:00Z"
-     *   },
-     *   "message": "Address added successfully"
-     * }
+     * @OA\Post(
+     *     path="/api/user/profile/addresses",
+     *     tags={"Profile"},
+     *     summary="Add new address",
+     *     description="Add a new address for the user",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"address_type", "street_address", "city", "state", "postal_code", "country"},
+     *             @OA\Property(property="address_type", type="string", enum={"home", "work", "other"}, description="Address type"),
+     *             @OA\Property(property="street_address", type="string", maxLength=255, description="Street address"),
+     *             @OA\Property(property="city", type="string", maxLength=100, description="City"),
+     *             @OA\Property(property="state", type="string", maxLength=100, description="State/Province"),
+     *             @OA\Property(property="postal_code", type="string", maxLength=20, description="Postal code"),
+     *             @OA\Property(property="country", type="string", maxLength=100, description="Country"),
+     *             @OA\Property(property="is_primary", type="boolean", description="Set as primary address")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Address added successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="address_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="address_type", type="string", example="home"),
+     *                 @OA\Property(property="street_address", type="string", example="456 New Street"),
+     *                 @OA\Property(property="city", type="string", example="Chittagong"),
+     *                 @OA\Property(property="state", type="string", example="Chittagong"),
+     *                 @OA\Property(property="postal_code", type="string", example="4000"),
+     *                 @OA\Property(property="country", type="string", example="Bangladesh"),
+     *                 @OA\Property(property="is_primary", type="boolean", example=false),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-20T16:00:00Z")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Address added successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The address type field is required."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="address_type",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The address type field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function addAddress(Request $request): JsonResponse
     {
@@ -363,34 +499,81 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update address
-     * 
-     * Update an existing address.
-     * 
-     * @authenticated
-     * @urlParam address_id string required The address ID. Example: "uuid-string"
-     * @bodyParam address_type string Address type (home,work,other).
-     * @bodyParam street_address string Street address.
-     * @bodyParam city string City.
-     * @bodyParam state string State/Province.
-     * @bodyParam postal_code string Postal code.
-     * @bodyParam country string Country.
-     * @bodyParam is_primary boolean Set as primary address.
-     * 
-     * @response 200 {
-     *   "data": {
-     *     "address_id": "uuid-string",
-     *     "address_type": "work",
-     *     "street_address": "456 Updated Street",
-     *     "city": "Dhaka",
-     *     "state": "Dhaka",
-     *     "postal_code": "1200",
-     *     "country": "Bangladesh",
-     *     "is_primary": true,
-     *     "updated_at": "2024-01-20T16:30:00Z"
-     *   },
-     *   "message": "Address updated successfully"
-     * }
+     * @OA\Put(
+     *     path="/api/user/profile/addresses/{address_id}",
+     *     tags={"Profile"},
+     *     summary="Update address",
+     *     description="Update an existing address",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="address_id",
+     *         in="path",
+     *         required=true,
+     *         description="The address ID",
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             @OA\Property(property="address_type", type="string", enum={"home", "work", "other"}, description="Address type"),
+     *             @OA\Property(property="street_address", type="string", maxLength=255, description="Street address"),
+     *             @OA\Property(property="city", type="string", maxLength=100, description="City"),
+     *             @OA\Property(property="state", type="string", maxLength=100, description="State/Province"),
+     *             @OA\Property(property="postal_code", type="string", maxLength=20, description="Postal code"),
+     *             @OA\Property(property="country", type="string", maxLength=100, description="Country"),
+     *             @OA\Property(property="is_primary", type="boolean", description="Set as primary address")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Address updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="address_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="address_type", type="string", example="work"),
+     *                 @OA\Property(property="street_address", type="string", example="456 Updated Street"),
+     *                 @OA\Property(property="city", type="string", example="Dhaka"),
+     *                 @OA\Property(property="state", type="string", example="Dhaka"),
+     *                 @OA\Property(property="postal_code", type="string", example="1200"),
+     *                 @OA\Property(property="country", type="string", example="Bangladesh"),
+     *                 @OA\Property(property="is_primary", type="boolean", example=true),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2024-01-20T16:30:00Z")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Address updated successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Address not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Address not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="address_type",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The selected address type is invalid.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function updateAddress(Request $request, string $address_id): JsonResponse
     {
@@ -437,16 +620,41 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete address
-     * 
-     * Delete an address.
-     * 
-     * @authenticated
-     * @urlParam address_id string required The address ID. Example: "uuid-string"
-     * 
-     * @response 200 {
-     *   "message": "Address deleted successfully"
-     * }
+     * @OA\Delete(
+     *     path="/api/user/profile/addresses/{address_id}",
+     *     tags={"Profile"},
+     *     summary="Delete address",
+     *     description="Delete an address",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="address_id",
+     *         in="path",
+     *         required=true,
+     *         description="The address ID",
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Address deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Address deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Address not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Address not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function deleteAddress(string $address_id): JsonResponse
     {

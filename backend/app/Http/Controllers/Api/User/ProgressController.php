@@ -10,9 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
- * @group User API - Learning Progress
- * 
- * Endpoints for tracking learning progress (requires authentication)
+ * @OA\Tag(
+ *     name="User Learning Progress",
+ *     description="Endpoints for tracking learning progress (requires authentication)"
+ * )
  */
 class ProgressController extends Controller
 {
@@ -22,54 +23,91 @@ class ProgressController extends Controller
     }
 
     /**
-     * Get course progress
-     * 
-     * Get detailed learning progress for a specific enrollment.
-     * 
-     * @authenticated
-     * @urlParam enrollment_id string required The enrollment ID. Example: "uuid-string"
-     * 
-     * @response 200 {
-     *   "data": {
-     *     "enrollment_id": "uuid-string",
-     *     "course_title": "Web Development Fundamentals",
-     *     "overall_progress": 65.5,
-     *     "modules": [
-     *       {
-     *         "module_id": "uuid-string",
-     *         "title": "HTML Basics",
-     *         "order_index": 1,
-     *         "progress_percentage": 100,
-     *         "completed_lessons": 5,
-     *         "total_lessons": 5,
-     *         "lessons": [
-     *           {
-     *             "lesson_id": "uuid-string",
-     *             "title": "Introduction to HTML",
-     *             "order_index": 1,
-     *             "duration_minutes": 30,
-     *             "lesson_type": "video",
-     *             "progress": {
-     *               "status": "completed",
-     *               "completion_percentage": 100,
-     *               "time_spent_minutes": 35,
-     *               "last_accessed_at": "2024-01-20T14:30:00Z",
-     *               "completed_at": "2024-01-18T16:45:00Z"
-     *             }
-     *           }
-     *         ]
-     *       }
-     *     ],
-     *     "statistics": {
-     *       "total_time_spent_hours": 25.5,
-     *       "lessons_completed": 16,
-     *       "lessons_total": 24,
-     *       "modules_completed": 4,
-     *       "modules_total": 6,
-     *       "completion_rate": 66.7
-     *     }
-     *   }
-     * }
+     * @OA\Get(
+     *     path="/api/user/progress/course/{enrollment_id}",
+     *     tags={"Learning Progress"},
+     *     summary="Get course progress",
+     *     description="Get detailed learning progress for a specific enrollment",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="enrollment_id",
+     *         in="path",
+     *         required=true,
+     *         description="The enrollment ID",
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Course progress retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="enrollment_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="course_title", type="string", example="Web Development Fundamentals"),
+     *                 @OA\Property(property="overall_progress", type="number", format="float", example=65.5),
+     *                 @OA\Property(
+     *                     property="modules",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="module_id", type="string", example="uuid-string"),
+     *                         @OA\Property(property="title", type="string", example="HTML Basics"),
+     *                         @OA\Property(property="order_index", type="integer", example=1),
+     *                         @OA\Property(property="progress_percentage", type="number", format="float", example=100),
+     *                         @OA\Property(property="completed_lessons", type="integer", example=5),
+     *                         @OA\Property(property="total_lessons", type="integer", example=5),
+     *                         @OA\Property(
+     *                             property="lessons",
+     *                             type="array",
+     *                             @OA\Items(
+     *                                 type="object",
+     *                                 @OA\Property(property="lesson_id", type="string", example="uuid-string"),
+     *                                 @OA\Property(property="title", type="string", example="Introduction to HTML"),
+     *                                 @OA\Property(property="order_index", type="integer", example=1),
+     *                                 @OA\Property(property="duration_minutes", type="integer", example=30),
+     *                                 @OA\Property(property="lesson_type", type="string", example="video"),
+     *                                 @OA\Property(
+     *                                     property="progress",
+     *                                     type="object",
+     *                                     @OA\Property(property="status", type="string", example="completed"),
+     *                                     @OA\Property(property="completion_percentage", type="number", format="float", example=100),
+     *                                     @OA\Property(property="time_spent_minutes", type="integer", example=35),
+     *                                     @OA\Property(property="last_accessed_at", type="string", format="date-time", example="2024-01-20T14:30:00Z"),
+     *                                     @OA\Property(property="completed_at", type="string", format="date-time", example="2024-01-18T16:45:00Z")
+     *                                 )
+     *                             )
+     *                         )
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="statistics",
+     *                     type="object",
+     *                     @OA\Property(property="total_time_spent_hours", type="number", format="float", example=25.5),
+     *                     @OA\Property(property="lessons_completed", type="integer", example=16),
+     *                     @OA\Property(property="lessons_total", type="integer", example=24),
+     *                     @OA\Property(property="modules_completed", type="integer", example=4),
+     *                     @OA\Property(property="modules_total", type="integer", example=6),
+     *                     @OA\Property(property="completion_rate", type="number", format="float", example=66.7)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Enrollment not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Enrollment not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function courseProgress(string $enrollment_id): JsonResponse
     {
@@ -177,32 +215,84 @@ class ProgressController extends Controller
     }
 
     /**
-     * Update lesson progress
-     * 
-     * Update or create progress for a specific lesson.
-     * 
-     * @authenticated
-     * @urlParam lesson_id string required The lesson ID. Example: "uuid-string"
-     * @bodyParam status string required Progress status (in_progress, completed). Example: "completed"
-     * @bodyParam completion_percentage integer Progress percentage (0-100). Example: 100
-     * @bodyParam time_spent_minutes integer Time spent on lesson in minutes. Example: 35
-     * 
-     * @response 200 {
-     *   "data": {
-     *     "progress_id": "uuid-string",
-     *     "lesson_id": "uuid-string",
-     *     "status": "completed",
-     *     "completion_percentage": 100,
-     *     "time_spent_minutes": 35,
-     *     "completed_at": "2024-01-20T16:45:00Z",
-     *     "updated_at": "2024-01-20T16:45:00Z"
-     *   },
-     *   "message": "Progress updated successfully"
-     * }
-     * 
-     * @response 403 {
-     *   "message": "Not enrolled in this lesson's course"
-     * }
+     * @OA\Post(
+     *     path="/api/user/progress/lesson/{lesson_id}",
+     *     tags={"Learning Progress"},
+     *     summary="Update lesson progress",
+     *     description="Update or create progress for a specific lesson",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="lesson_id",
+     *         in="path",
+     *         required=true,
+     *         description="The lesson ID",
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"status", "completion_percentage"},
+     *             @OA\Property(property="status", type="string", enum={"in_progress", "completed"}, description="Progress status"),
+     *             @OA\Property(property="completion_percentage", type="integer", minimum=0, maximum=100, description="Progress percentage (0-100)"),
+     *             @OA\Property(property="time_spent_minutes", type="integer", minimum=0, description="Time spent on lesson in minutes")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Progress updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="progress_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="lesson_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="status", type="string", example="completed"),
+     *                 @OA\Property(property="completion_percentage", type="integer", example=100),
+     *                 @OA\Property(property="time_spent_minutes", type="integer", example=35),
+     *                 @OA\Property(property="completed_at", type="string", format="date-time", example="2024-01-20T16:45:00Z"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2024-01-20T16:45:00Z")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Progress updated successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Not enrolled in this lesson's course",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Not enrolled in this lesson's course")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Lesson not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Lesson not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The status field is required."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="status",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The status field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function updateLessonProgress(Request $request, string $lesson_id): JsonResponse
     {
@@ -255,46 +345,88 @@ class ProgressController extends Controller
     }
 
     /**
-     * Get lesson content
-     * 
-     * Get lesson content and resources for enrolled users.
-     * 
-     * @authenticated
-     * @urlParam lesson_id string required The lesson ID. Example: "uuid-string"
-     * 
-     * @response 200 {
-     *   "data": {
-     *     "lesson_id": "uuid-string",
-     *     "title": "Introduction to HTML",
-     *     "description": "Learn the basics of HTML structure",
-     *     "content": "HTML lesson content here...",
-     *     "lesson_type": "video",
-     *     "duration_minutes": 30,
-     *     "order_index": 1,
-     *     "video_url": "https://example.com/video.mp4",
-     *     "is_preview": false,
-     *     "module": {
-     *       "module_id": "uuid-string",
-     *       "title": "HTML Basics",
-     *       "order_index": 1
-     *     },
-     *     "resources": [
-     *       {
-     *         "resource_id": "uuid-string",
-     *         "title": "HTML Cheat Sheet",
-     *         "description": "Quick reference for HTML tags",
-     *         "resource_type": "document",
-     *         "file_url": "https://example.com/cheatsheet.pdf",
-     *         "file_size_mb": 2.5
-     *       }
-     *     ],
-     *     "progress": {
-     *       "status": "in_progress",
-     *       "completion_percentage": 75,
-     *       "time_spent_minutes": 25
-     *     }
-     *   }
-     * }
+     * @OA\Get(
+     *     path="/api/user/progress/lesson/{lesson_id}/content",
+     *     tags={"Learning Progress"},
+     *     summary="Get lesson content",
+     *     description="Get lesson content and resources for enrolled users",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="lesson_id",
+     *         in="path",
+     *         required=true,
+     *         description="The lesson ID",
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lesson content retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="lesson_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="title", type="string", example="Introduction to HTML"),
+     *                 @OA\Property(property="description", type="string", example="Learn the basics of HTML structure"),
+     *                 @OA\Property(property="content", type="string", example="HTML lesson content here..."),
+     *                 @OA\Property(property="lesson_type", type="string", example="video"),
+     *                 @OA\Property(property="duration_minutes", type="integer", example=30),
+     *                 @OA\Property(property="order_index", type="integer", example=1),
+     *                 @OA\Property(property="video_url", type="string", example="https://example.com/video.mp4"),
+     *                 @OA\Property(property="is_preview", type="boolean", example=false),
+     *                 @OA\Property(
+     *                     property="module",
+     *                     type="object",
+     *                     @OA\Property(property="module_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="title", type="string", example="HTML Basics"),
+     *                     @OA\Property(property="order_index", type="integer", example=1)
+     *                 ),
+     *                 @OA\Property(
+     *                     property="resources",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="resource_id", type="string", example="uuid-string"),
+     *                         @OA\Property(property="title", type="string", example="HTML Cheat Sheet"),
+     *                         @OA\Property(property="description", type="string", example="Quick reference for HTML tags"),
+     *                         @OA\Property(property="resource_type", type="string", example="document"),
+     *                         @OA\Property(property="file_url", type="string", example="https://example.com/cheatsheet.pdf"),
+     *                         @OA\Property(property="file_size_mb", type="number", format="float", example=2.5)
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="progress",
+     *                     type="object",
+     *                     nullable=true,
+     *                     @OA\Property(property="status", type="string", example="in_progress"),
+     *                     @OA\Property(property="completion_percentage", type="integer", example=75),
+     *                     @OA\Property(property="time_spent_minutes", type="integer", example=25)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Access denied",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Access denied. You must be enrolled to view this lesson.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Lesson not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Lesson not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function lessonContent(string $lesson_id): JsonResponse
     {

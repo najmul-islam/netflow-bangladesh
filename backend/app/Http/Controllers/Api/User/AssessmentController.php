@@ -12,9 +12,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 /**
- * @group User API - Assessments
- * 
- * Endpoints for taking assessments and viewing results (requires authentication)
+ * @OA\Tag(
+ *     name="User Assessments",
+ *     description="Endpoints for taking assessments and viewing results (requires authentication)"
+ * )
  */
 class AssessmentController extends Controller
 {
@@ -24,30 +25,55 @@ class AssessmentController extends Controller
     }
 
     /**
-     * Get available assessments
-     * 
-     * Get all assessments for user's enrolled batches.
-     * 
-     * @authenticated
-     * @queryParam batch_id string Filter by batch ID. Example: "uuid-string"
-     * @queryParam status string Filter by assessment status (upcoming,active,completed,expired). Example: active
-     * 
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "assessment_id": "uuid-string",
-     *       "title": "HTML & CSS Quiz",
-     *       "description": "Test your knowledge of HTML and CSS",
-     *       "assessment_type": "quiz",
-     *       "total_marks": 50,
-     *       "passing_marks": 35,
-     *       "duration_minutes": 60,
-     *       "start_date": "2024-01-20T09:00:00Z",
-     *       "end_date": "2024-01-22T23:59:59Z",
-     *       "max_attempts": 3,
-     *       "status": "active",
-     *       "batch": {
-     *         "batch_id": "uuid-string",
+     * @OA\Get(
+     *     path="/api/user/assessments",
+     *     tags={"User Assessments"},
+     *     summary="Get available assessments",
+     *     description="Get all assessments for user's enrolled batches",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="batch_id",
+     *         in="query",
+     *         description="Filter by batch ID",
+     *         required=false,
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Filter by assessment status",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"upcoming","active","completed","expired"}, example="active")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Available assessments",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="assessment_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="title", type="string", example="HTML & CSS Quiz"),
+     *                     @OA\Property(property="description", type="string", example="Test your knowledge of HTML and CSS"),
+     *                     @OA\Property(property="assessment_type", type="string", example="quiz"),
+     *                     @OA\Property(property="total_marks", type="integer", example=50),
+     *                     @OA\Property(property="passing_marks", type="integer", example=35),
+     *                     @OA\Property(property="duration_minutes", type="integer", example=60),
+     *                     @OA\Property(property="start_date", type="string", example="2024-01-20T09:00:00Z"),
+     *                     @OA\Property(property="end_date", type="string", example="2024-01-22T23:59:59Z"),
+     *                     @OA\Property(property="max_attempts", type="integer", example=3),
+     *                     @OA\Property(property="status", type="string", example="active")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     )
+     * )
      *         "batch_name": "Web Dev Batch 2024-A",
      *         "course_title": "Web Development Fundamentals"
      *       },
@@ -135,37 +161,62 @@ class AssessmentController extends Controller
     }
 
     /**
-     * Start assessment attempt
-     * 
-     * Start a new attempt for an assessment.
-     * 
-     * @authenticated
-     * @urlParam assessment_id string required The assessment ID. Example: "uuid-string"
-     * 
-     * @response 201 {
-     *   "data": {
-     *     "attempt_id": "uuid-string",
-     *     "assessment_id": "uuid-string",
-     *     "started_at": "2024-01-20T14:30:00Z",
-     *     "time_limit_minutes": 60,
-     *     "expires_at": "2024-01-20T15:30:00Z",
-     *     "questions": [
-     *       {
-     *         "question_id": "uuid-string",
+     * @OA\Post(
+     *     path="/api/user/assessments/{assessment_id}/start",
+     *     tags={"User Assessments"},
+     *     summary="Start assessment attempt",
+     *     description="Start a new attempt for an assessment",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="assessment_id",
+     *         in="path",
+     *         description="The assessment ID",
+     *         required=true,
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Assessment attempt started",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="attempt_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="assessment_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="started_at", type="string", example="2024-01-20T14:30:00Z"),
+     *                 @OA\Property(property="time_limit_minutes", type="integer", example=60),
+     *                 @OA\Property(property="expires_at", type="string", example="2024-01-20T15:30:00Z")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Cannot start assessment",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Cannot start assessment"),
+     *             @OA\Property(property="errors", type="array", @OA\Items(type="string"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     )
+     * )
      *         "question_text": "What does HTML stand for?",
      *         "question_type": "multiple_choice",
      *         "marks": 5,
-     *         "order_index": 1,
+     *         "sort_order": 1,
      *         "options": [
      *           {
      *             "option_id": "uuid-string",
      *             "option_text": "HyperText Markup Language",
-     *             "option_letter": "A"
+     *             "sort_order": 1
      *           },
      *           {
      *             "option_id": "uuid-string",
      *             "option_text": "High Tech Modern Language",
-     *             "option_letter": "B"
+     *             "sort_order": 2
      *           }
      *         ]
      *       }
@@ -182,10 +233,10 @@ class AssessmentController extends Controller
     {
         $assessment = BatchAssessment::with([
             'questions' => function ($query) {
-                $query->orderBy('order_index');
+                $query->orderBy('sort_order');
             },
             'questions.options' => function ($query) {
-                $query->orderBy('option_letter');
+                $query->orderBy('sort_order');
             }
         ])
         ->where('assessment_id', $assessment_id)
@@ -273,37 +324,106 @@ class AssessmentController extends Controller
     }
 
     /**
-     * Submit assessment answers
-     * 
-     * Submit answers for an assessment attempt.
-     * 
-     * @authenticated
-     * @urlParam attempt_id string required The attempt ID. Example: "uuid-string"
-     * @bodyParam answers array required Array of question answers.
-     * @bodyParam answers.*.question_id string required Question ID.
-     * @bodyParam answers.*.selected_options array required Array of selected option IDs.
-     * @bodyParam answers.*.text_answer string Text answer for essay questions.
-     * 
-     * @response 200 {
-     *   "data": {
-     *     "attempt_id": "uuid-string",
-     *     "score": 42,
-     *     "total_marks": 50,
-     *     "percentage": 84,
-     *     "passed": true,
-     *     "status": "completed",
-     *     "completed_at": "2024-01-20T15:25:00Z",
-     *     "time_taken_minutes": 55,
-     *     "correct_answers": 8,
-     *     "total_questions": 10
-     *   },
-     *   "message": "Assessment submitted successfully"
-     * }
-     * 
-     * @response 400 {
-     *   "message": "Cannot submit assessment",
-     *   "errors": ["Time limit exceeded", "Attempt already completed"]
-     * }
+     * @OA\Post(
+     *     path="/api/user/assessments/attempts/{attempt_id}/submit",
+     *     tags={"User Assessments"},
+     *     summary="Submit assessment answers",
+     *     description="Submit answers for an assessment attempt",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="attempt_id",
+     *         in="path",
+     *         required=true,
+     *         description="The attempt ID",
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"answers"},
+     *             @OA\Property(
+     *                 property="answers",
+     *                 type="array",
+     *                 description="Array of question answers",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     required={"question_id"},
+     *                     @OA\Property(property="question_id", type="string", description="Question ID"),
+     *                     @OA\Property(
+     *                         property="selected_options",
+     *                         type="array",
+     *                         description="Array of selected option IDs",
+     *                         @OA\Items(type="string")
+     *                     ),
+     *                     @OA\Property(property="text_answer", type="string", description="Text answer for essay questions")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Assessment submitted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="attempt_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="score", type="integer", example=42),
+     *                 @OA\Property(property="total_marks", type="integer", example=50),
+     *                 @OA\Property(property="percentage", type="number", format="float", example=84),
+     *                 @OA\Property(property="passed", type="boolean", example=true),
+     *                 @OA\Property(property="status", type="string", example="completed"),
+     *                 @OA\Property(property="completed_at", type="string", format="date-time", example="2024-01-20T15:25:00Z"),
+     *                 @OA\Property(property="time_taken_minutes", type="integer", example=55),
+     *                 @OA\Property(property="correct_answers", type="integer", example=8),
+     *                 @OA\Property(property="total_questions", type="integer", example=10)
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Assessment submitted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Cannot submit assessment",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Cannot submit assessment"),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="array",
+     *                 @OA\Items(type="string", example="Time limit exceeded")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Attempt not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Attempt not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The answers field is required."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="answers",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The answers field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function submitAnswers(Request $request, string $attempt_id): JsonResponse
     {
@@ -415,44 +535,84 @@ class AssessmentController extends Controller
     }
 
     /**
-     * Get attempt results
-     * 
-     * Get detailed results for a completed assessment attempt.
-     * 
-     * @authenticated
-     * @urlParam attempt_id string required The attempt ID. Example: "uuid-string"
-     * 
-     * @response 200 {
-     *   "data": {
-     *     "attempt_id": "uuid-string",
-     *     "assessment_title": "HTML & CSS Quiz",
-     *     "score": 42,
-     *     "total_marks": 50,
-     *     "percentage": 84,
-     *     "passed": true,
-     *     "status": "completed",
-     *     "started_at": "2024-01-20T14:30:00Z",
-     *     "completed_at": "2024-01-20T15:25:00Z",
-     *     "time_taken_minutes": 55,
-     *     "questions_summary": {
-     *       "total": 10,
-     *       "correct": 8,
-     *       "incorrect": 2,
-     *       "unanswered": 0
-     *     },
-     *     "detailed_responses": [
-     *       {
-     *         "question_id": "uuid-string",
-     *         "question_text": "What does HTML stand for?",
-     *         "your_answer": ["HyperText Markup Language"],
-     *         "correct_answer": ["HyperText Markup Language"],
-     *         "is_correct": true,
-     *         "marks_awarded": 5,
-     *         "marks_possible": 5
-     *       }
-     *     ]
-     *   }
-     * }
+     * @OA\Get(
+     *     path="/api/user/assessments/attempts/{attempt_id}/results",
+     *     tags={"User Assessments"},
+     *     summary="Get attempt results",
+     *     description="Get detailed results for a completed assessment attempt",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="attempt_id",
+     *         in="path",
+     *         required=true,
+     *         description="The attempt ID",
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Assessment results retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="attempt_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="assessment_title", type="string", example="HTML & CSS Quiz"),
+     *                 @OA\Property(property="score", type="integer", example=42),
+     *                 @OA\Property(property="total_marks", type="integer", example=50),
+     *                 @OA\Property(property="percentage", type="number", format="float", example=84),
+     *                 @OA\Property(property="passed", type="boolean", example=true),
+     *                 @OA\Property(property="status", type="string", example="completed"),
+     *                 @OA\Property(property="started_at", type="string", format="date-time", example="2024-01-20T14:30:00Z"),
+     *                 @OA\Property(property="completed_at", type="string", format="date-time", example="2024-01-20T15:25:00Z"),
+     *                 @OA\Property(property="time_taken_minutes", type="integer", example=55),
+     *                 @OA\Property(
+     *                     property="questions_summary",
+     *                     type="object",
+     *                     @OA\Property(property="total", type="integer", example=10),
+     *                     @OA\Property(property="correct", type="integer", example=8),
+     *                     @OA\Property(property="incorrect", type="integer", example=2),
+     *                     @OA\Property(property="unanswered", type="integer", example=0)
+     *                 ),
+     *                 @OA\Property(
+     *                     property="detailed_responses",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="question_id", type="string", example="uuid-string"),
+     *                         @OA\Property(property="question_text", type="string", example="What does HTML stand for?"),
+     *                         @OA\Property(
+     *                             property="your_answer",
+     *                             type="array",
+     *                             @OA\Items(type="string", example="HyperText Markup Language")
+     *                         ),
+     *                         @OA\Property(
+     *                             property="correct_answer",
+     *                             type="array",
+     *                             @OA\Items(type="string", example="HyperText Markup Language")
+     *                         ),
+     *                         @OA\Property(property="is_correct", type="boolean", example=true),
+     *                         @OA\Property(property="marks_awarded", type="integer", example=5),
+     *                         @OA\Property(property="marks_possible", type="integer", example=5)
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Attempt not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Attempt not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function getResults(string $attempt_id): JsonResponse
     {

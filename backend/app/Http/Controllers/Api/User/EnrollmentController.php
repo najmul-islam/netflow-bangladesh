@@ -10,9 +10,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 /**
- * @group User API - Enrollments
- * 
- * Endpoints for managing course enrollments (requires authentication)
+ * @OA\Tag(
+ *     name="User Enrollments",
+ *     description="Endpoints for managing course enrollments (requires authentication)"
+ * )
  */
 class EnrollmentController extends Controller
 {
@@ -22,55 +23,68 @@ class EnrollmentController extends Controller
     }
 
     /**
-     * Get user enrollments
-     * 
-     * Get all enrollments for the authenticated user.
-     * 
-     * @authenticated
-     * @queryParam status string Filter by enrollment status (pending,active,completed,dropped,suspended). Example: active
-     * @queryParam page integer Page number for pagination. Example: 1
-     * @queryParam per_page integer Number of items per page (max 20). Example: 10
-     * 
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "enrollment_id": "uuid-string",
-     *       "enrollment_date": "2024-01-15",
-     *       "status": "active",
-     *       "progress_percentage": 65.5,
-     *       "completion_date": null,
-     *       "batch": {
-     *         "batch_id": "uuid-string",
-     *         "batch_name": "Web Dev Batch 2024-A",
-     *         "start_date": "2024-02-01",
-     *         "end_date": "2024-04-01",
-     *         "status": "active",
-     *         "course": {
-     *           "course_id": "uuid-string",
-     *           "title": "Web Development Fundamentals",
-     *           "thumbnail_url": "https://example.com/thumb.jpg",
-     *           "level": "beginner"
-     *         }
-     *       },
-     *       "latest_activity": {
-     *         "last_lesson_date": "2024-01-20",
-     *         "last_lesson_title": "JavaScript Variables"
-     *       }
-     *     }
-     *   ],
-     *   "meta": {
-     *     "current_page": 1,
-     *     "total": 3,
-     *     "per_page": 10,
-     *     "last_page": 1
-     *   }
-     * }
+     * @OA\Get(
+     *     path="/api/user/enrollments",
+     *     tags={"User Enrollments"},
+     *     summary="Get user enrollments",
+     *     description="Get all enrollments for the authenticated user",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Filter by enrollment status",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"pending","active","completed","dropped","suspended"}, example="active")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of items per page (max 20)",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=10)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User enrollments",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="enrollment_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="enrollment_date", type="string", example="2024-01-15"),
+     *                     @OA\Property(property="status", type="string", example="active"),
+     *                     @OA\Property(property="progress_percentage", type="number", example=65.5),
+     *                     @OA\Property(property="completion_date", type="string", example=null)
+     *                 )
+     *             ),
+     *             @OA\Property(property="meta", type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="total", type="integer", example=3),
+     *                 @OA\Property(property="per_page", type="integer", example=10),
+     *                 @OA\Property(property="last_page", type="integer", example=1)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     )
+     * )
      */
     public function index(Request $request): JsonResponse
     {
         $query = auth()->user()->enrollments()
             ->with([
-                'batch.course:course_id,title,thumbnail_url,level',
+                'batch.course:course_id,title,thumbnail_url,difficulty_level',
                 'batch:batch_id,course_id,batch_name,start_date,end_date,status'
             ]);
 
@@ -125,38 +139,86 @@ class EnrollmentController extends Controller
     }
 
     /**
-     * Enroll in a batch
-     * 
-     * Enroll the authenticated user in a course batch.
-     * 
-     * @authenticated
-     * @bodyParam batch_id string required The batch ID to enroll in. Example: "uuid-string"
-     * 
-     * @response 201 {
-     *   "data": {
-     *     "enrollment_id": "uuid-string",
-     *     "user_id": "uuid-string",
-     *     "batch_id": "uuid-string",
-     *     "enrollment_date": "2024-01-15",
-     *     "status": "pending",
-     *     "batch": {
-     *       "batch_id": "uuid-string",
-     *       "batch_name": "Web Dev Batch 2024-A",
-     *       "price": 99.99,
-     *       "currency": "USD"
-     *     }
-     *   },
-     *   "message": "Successfully enrolled in the batch"
-     * }
-     * 
-     * @response 400 {
-     *   "message": "Enrollment not available",
-     *   "errors": ["Batch is full", "Enrollment period has ended"]
-     * }
-     * 
-     * @response 409 {
-     *   "message": "Already enrolled in this batch"
-     * }
+     * @OA\Post(
+     *     path="/api/user/enrollments",
+     *     tags={"User Enrollments"},
+     *     summary="Enroll in a batch",
+     *     description="Enroll the authenticated user in a course batch",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"batch_id"},
+     *             @OA\Property(property="batch_id", type="string", description="The batch ID to enroll in", example="uuid-string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Successfully enrolled in the batch",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="enrollment_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="user_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="batch_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="enrollment_date", type="string", example="2024-01-15"),
+     *                 @OA\Property(property="status", type="string", example="pending"),
+     *                 @OA\Property(
+     *                     property="batch",
+     *                     type="object",
+     *                     @OA\Property(property="batch_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="batch_name", type="string", example="Web Dev Batch 2024-A"),
+     *                     @OA\Property(property="price", type="number", format="float", example=99.99),
+     *                     @OA\Property(property="currency", type="string", example="USD")
+     *                 )
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Successfully enrolled in the batch")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Enrollment not available",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Enrollment not available"),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="array",
+     *                 @OA\Items(type="string", example="Batch is full")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Already enrolled in this batch",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Already enrolled in this batch")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The batch id field is required."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="batch_id",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The batch id field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function store(Request $request): JsonResponse
     {
@@ -214,7 +276,8 @@ class EnrollmentController extends Controller
         ]);
 
         $enrollment->load([
-            'batch:batch_id,batch_name,price,currency'
+            'batch:batch_id,batch_name,course_id',
+            'batch.course:course_id,title,price,currency'
         ]);
 
         return response()->json([
@@ -224,51 +287,84 @@ class EnrollmentController extends Controller
     }
 
     /**
-     * Get enrollment details
-     * 
-     * Get detailed information about a specific enrollment.
-     * 
-     * @authenticated
-     * @urlParam enrollment_id string required The enrollment ID. Example: "uuid-string"
-     * 
-     * @response 200 {
-     *   "data": {
-     *     "enrollment_id": "uuid-string",
-     *     "enrollment_date": "2024-01-15",
-     *     "status": "active",
-     *     "progress_percentage": 65.5,
-     *     "completion_date": null,
-     *     "batch": {
-     *       "batch_id": "uuid-string",
-     *       "batch_name": "Web Dev Batch 2024-A",
-     *       "start_date": "2024-02-01",
-     *       "end_date": "2024-04-01",
-     *       "status": "active",
-     *       "course": {
-     *         "course_id": "uuid-string",
-     *         "title": "Web Development Fundamentals",
-     *         "description": "Learn web development from basics",
-     *         "level": "beginner",
-     *         "duration_hours": 40
-     *       }
-     *     },
-     *     "progress_details": {
-     *       "total_modules": 6,
-     *       "completed_modules": 4,
-     *       "total_lessons": 24,
-     *       "completed_lessons": 16,
-     *       "total_assessments": 3,
-     *       "completed_assessments": 2,
-     *       "average_score": 85.5
-     *     }
-     *   }
-     * }
+     * @OA\Get(
+     *     path="/api/user/enrollments/{enrollment_id}",
+     *     tags={"User Enrollments"},
+     *     summary="Get enrollment details",
+     *     description="Get detailed information about a specific enrollment",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="enrollment_id",
+     *         in="path",
+     *         required=true,
+     *         description="The enrollment ID",
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Enrollment details retrieved successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="enrollment_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="enrollment_date", type="string", example="2024-01-15"),
+     *                 @OA\Property(property="status", type="string", example="active"),
+     *                 @OA\Property(property="progress_percentage", type="number", format="float", example=65.5),
+     *                 @OA\Property(property="completion_date", type="string", nullable=true, example=null),
+     *                 @OA\Property(
+     *                     property="batch",
+     *                     type="object",
+     *                     @OA\Property(property="batch_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="batch_name", type="string", example="Web Dev Batch 2024-A"),
+     *                     @OA\Property(property="start_date", type="string", example="2024-02-01"),
+     *                     @OA\Property(property="end_date", type="string", example="2024-04-01"),
+     *                     @OA\Property(property="status", type="string", example="active"),
+     *                     @OA\Property(
+     *                         property="course",
+     *                         type="object",
+     *                         @OA\Property(property="course_id", type="string", example="uuid-string"),
+     *                         @OA\Property(property="title", type="string", example="Web Development Fundamentals"),
+     *                         @OA\Property(property="description", type="string", example="Learn web development from basics"),
+     *                         @OA\Property(property="difficulty_level", type="string", example="beginner"),
+     *                         @OA\Property(property="estimated_duration_hours", type="integer", example=40)
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="progress_details",
+     *                     type="object",
+     *                     @OA\Property(property="total_modules", type="integer", example=6),
+     *                     @OA\Property(property="completed_modules", type="integer", example=4),
+     *                     @OA\Property(property="total_lessons", type="integer", example=24),
+     *                     @OA\Property(property="completed_lessons", type="integer", example=16),
+     *                     @OA\Property(property="total_assessments", type="integer", example=3),
+     *                     @OA\Property(property="completed_assessments", type="integer", example=2),
+     *                     @OA\Property(property="average_score", type="number", format="float", example=85.5)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Enrollment not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Enrollment not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function show(string $enrollment_id): JsonResponse
     {
         $enrollment = auth()->user()->enrollments()
             ->with([
-                'batch.course:course_id,title,description,level,duration_hours',
+                'batch.course:course_id,title,description,difficulty_level,estimated_duration_hours',
                 'batch:batch_id,course_id,batch_name,start_date,end_date,status'
             ])
             ->where('enrollment_id', $enrollment_id)
@@ -319,22 +415,78 @@ class EnrollmentController extends Controller
     }
 
     /**
-     * Update enrollment status
-     * 
-     * Update the status of an enrollment (e.g., drop from course).
-     * 
-     * @authenticated
-     * @urlParam enrollment_id string required The enrollment ID. Example: "uuid-string"
-     * @bodyParam status string required New status (dropped). Example: "dropped"
-     * 
-     * @response 200 {
-     *   "data": {
-     *     "enrollment_id": "uuid-string",
-     *     "status": "dropped",
-     *     "updated_at": "2024-01-20T10:30:00Z"
-     *   },
-     *   "message": "Enrollment status updated successfully"
-     * }
+     * @OA\Patch(
+     *     path="/api/user/enrollments/{enrollment_id}",
+     *     tags={"User Enrollments"},
+     *     summary="Update enrollment status",
+     *     description="Update the status of an enrollment (e.g., drop from course)",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="enrollment_id",
+     *         in="path",
+     *         required=true,
+     *         description="The enrollment ID",
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"status"},
+     *             @OA\Property(property="status", type="string", enum={"dropped"}, description="New status", example="dropped")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Enrollment status updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="enrollment_id", type="string", example="uuid-string"),
+     *                 @OA\Property(property="status", type="string", example="dropped"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2024-01-20T10:30:00Z")
+     *             ),
+     *             @OA\Property(property="message", type="string", example="Enrollment status updated successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Cannot drop enrollment",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Can only drop active enrollments")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Enrollment not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Enrollment not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The status field is required."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="status",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="The status field is required.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
      */
     public function update(Request $request, string $enrollment_id): JsonResponse
     {

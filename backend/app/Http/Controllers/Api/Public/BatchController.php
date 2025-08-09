@@ -8,42 +8,74 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
- * @group Public API - Batches
- * 
- * Public endpoints for browsing available course batches
+ * @OA\Tag(
+ *     name="Public Batches",
+ *     description="Public endpoints for browsing available course batches"
+ * )
  */
 class BatchController extends Controller
 {
     /**
-     * List available batches
-     * 
-     * Get a list of batches that are open for enrollment.
-     * 
-     * @queryParam course_id string Filter by course ID. Example: "uuid-string"
-     * @queryParam page integer Page number for pagination. Example: 1
-     * @queryParam per_page integer Number of items per page (max 20). Example: 10
-     * 
-     * @response 200 {
-     *   "data": [
-     *     {
-     *       "batch_id": "uuid-string",
-     *       "batch_name": "Web Dev Batch 2024-A",
-     *       "start_date": "2024-02-01",
-     *       "end_date": "2024-04-01",
-     *       "enrollment_start": "2024-01-01",
-     *       "enrollment_end": "2024-01-25",
-     *       "max_students": 30,
-     *       "enrolled_count": 15,
-     *       "available_spots": 15,
-     *       "status": "open",
-     *       "price": 99.99,
-     *       "currency": "USD",
-     *       "schedule": "Mon-Wed-Fri 7:00-9:00 PM",
+     * @OA\Get(
+     *     path="/api/public/batches",
+     *     tags={"Public Batches"},
+     *     summary="List available batches",
+     *     description="Get a list of batches that are open for enrollment",
+     *     @OA\Parameter(
+     *         name="course_id",
+     *         in="query",
+     *         description="Filter by course ID",
+     *         required=false,
+     *         @OA\Schema(type="string", example="uuid-string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Page number for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Number of items per page (max 20)",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=10)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="batch_id", type="string", example="uuid-string"),
+     *                     @OA\Property(property="batch_name", type="string", example="Web Dev Batch 2024-A"),
+     *                     @OA\Property(property="start_date", type="string", example="2024-02-01"),
+     *                     @OA\Property(property="end_date", type="string", example="2024-04-01"),
+     *                     @OA\Property(property="enrollment_start", type="string", example="2024-01-01"),
+     *                     @OA\Property(property="enrollment_end", type="string", example="2024-01-25"),
+     *                     @OA\Property(property="max_students", type="integer", example=30),
+     *                     @OA\Property(property="enrolled_count", type="integer", example=15),
+     *                     @OA\Property(property="available_spots", type="integer", example=15),
+     *                     @OA\Property(property="status", type="string", example="open"),
+     *                     @OA\Property(property="price", type="number", example=99.99),
+     *                     @OA\Property(property="currency", type="string", example="USD")
+     *                 )
+     *             ),
+     *             @OA\Property(property="meta", type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="total", type="integer", example=8),
+     *                 @OA\Property(property="per_page", type="integer", example=10),
+     *                 @OA\Property(property="last_page", type="integer", example=1)
+     *             )
+     *         )
+     *     )
+     * )
      *       "course": {
      *         "course_id": "uuid-string",
      *         "title": "Web Development Fundamentals",
-     *         "level": "beginner",
-     *         "duration_hours": 40
+     *         "difficulty_level": "beginner",
+     *         "estimated_duration_hours": 40
      *       },
      *       "instructors": [
      *         {
@@ -66,7 +98,7 @@ class BatchController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = CourseBatch::with([
-            'course:course_id,title,level,duration_hours',
+            'course:course_id,title,difficulty_level,estimated_duration_hours',
             'instructors:user_id,first_name,last_name,bio'
         ])
         ->withCount('enrollments as enrolled_count')
@@ -129,8 +161,8 @@ class BatchController extends Controller
      *       "course_id": "uuid-string",
      *       "title": "Web Development Fundamentals",
      *       "description": "Learn web development from scratch",
-     *       "level": "beginner",
-     *       "duration_hours": 40,
+     *       "difficulty_level": "beginner",
+     *       "estimated_duration_hours": 40,
      *       "prerequisites": "Basic computer skills"
      *     },
      *     "instructors": [
@@ -160,7 +192,7 @@ class BatchController extends Controller
     public function show(string $batch_id): JsonResponse
     {
         $batch = CourseBatch::with([
-            'course:course_id,title,description,level,duration_hours,prerequisites',
+            'course:course_id,title,description,difficulty_level,estimated_duration_hours,prerequisites',
             'instructors:user_id,first_name,last_name,email,bio,expertise'
         ])
         ->withCount('enrollments as enrolled_count')
