@@ -34,27 +34,23 @@ class Login extends BaseLogin
     protected function getEmailFormComponent(): Component
     {
         return TextInput::make('email')
-            ->label(__('filament-panels::pages/auth/login.form.email.label'))
+            ->label('Email Address')
             ->email()
             ->required()
             ->autocomplete()
             ->autofocus()
-            ->extraInputAttributes(['tabindex' => 1])
-            ->extraAttributes([
-                'class' => 'bg-white border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm',
-            ]);
+            ->placeholder('Enter your email address')
+            ->extraInputAttributes(['tabindex' => 1]);
     }
 
     protected function getPasswordFormComponent(): Component
     {
         return TextInput::make('password')
-            ->label(__('filament-panels::pages/auth/login.form.password.label'))
+            ->label('Password')
             ->password()
             ->required()
-            ->extraInputAttributes(['tabindex' => 2])
-            ->extraAttributes([
-                'class' => 'bg-white border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-lg shadow-sm',
-            ]);
+            ->placeholder('Enter your password')
+            ->extraInputAttributes(['tabindex' => 2]);
     }
 
     // Fix method signatures to match parent class and hide all default content
