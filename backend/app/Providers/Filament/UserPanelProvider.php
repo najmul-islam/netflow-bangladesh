@@ -24,7 +24,7 @@ class UserPanelProvider extends PanelProvider
     {
         return $panel
             ->id('user')
-            ->path('/')
+            ->path('')
             ->login(\App\Filament\User\Pages\Auth\Login::class)
             ->colors([
                 'primary' => [
@@ -55,7 +55,7 @@ class UserPanelProvider extends PanelProvider
                 ],
             ])
             ->brandName('NetFlow Bangladesh')
-            ->brandLogo(asset('images/logo.png'))
+            // ->brandLogo(asset('images/logo.png'))
             ->favicon(asset('favicon.ico'))
             ->renderHook(
                 'panels::body.end',
@@ -70,6 +70,8 @@ class UserPanelProvider extends PanelProvider
                         border-radius: 24px !important;
                         box-shadow: 0 32px 64px -12px rgba(11, 46, 88, 0.3) !important;
                     }
+                    /* Hide default heading/subheading area on auth pages */
+                    .fi-simple-header { display:none !important; }
                     .fi-btn-primary { 
                         background: linear-gradient(135deg, #0b2e58 0%, #0b2e58 100%) !important; 
                         border-radius: 12px !important;

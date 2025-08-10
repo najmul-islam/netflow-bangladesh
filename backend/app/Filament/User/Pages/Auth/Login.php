@@ -2,6 +2,7 @@
 
 namespace App\Filament\User\Pages\Auth;
 
+use Illuminate\Contracts\Support\Htmlable;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -10,6 +11,11 @@ use Illuminate\Validation\ValidationException;
 
 class Login extends BaseLogin
 {
+    /**
+     * Use the custom Blade view for the login page.
+     */
+    protected static string $view = 'filament.user.pages.auth.login';
+
     public function form(Form $form): Form
     {
         return $form
@@ -51,18 +57,31 @@ class Login extends BaseLogin
             ]);
     }
 
-    public function getTitle(): string
+    // Fix method signatures to match parent class and hide all default content
+    public function getTitle(): Htmlable|string
     {
-        return 'Sign in to NetFlow Bangladesh';
+        return '';
     }
 
-    public function getHeading(): string
+    public function getHeading(): Htmlable|string
     {
-        return 'Welcome Back';
+        return '';
     }
 
-    public function getSubheading(): string
+    public function getSubheading(): Htmlable|string|null
     {
-        return 'Sign in to your NetFlow Bangladesh account';
+        return null;
     }
+
+    // Hide brand logo and name
+    public function getBrandName(): ?string
+    {
+        return null;
+    }
+
+    public function getBrandLogo(): ?string
+    {
+        return null;
+    }
+   
 }

@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Brand helpers */
+:root {
+    --brand-primary: #0b2e58;
+    --brand-secondary: #f76704;
+}
