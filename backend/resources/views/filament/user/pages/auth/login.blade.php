@@ -151,6 +151,7 @@
 
             /* Responsive adjustments */
             @media (max-width: 640px) {
+
                 .fi-input input,
                 .fi-input-wrapper input,
                 input[type="email"],
@@ -183,7 +184,7 @@
                         <div style="display: flex; flex-direction: column; gap: 1.25rem;">
                             {{ $this->form }}
                         </div>
-                        
+
                         <!-- Submit button -->
                         <button type="submit"
                             style="width: 100%; background: linear-gradient(135deg, #0B2E58 0%, #1e40af 100%); color: white; font-weight: 600; padding: 0.875rem 1rem; border-radius: 0.75rem; transition: all 0.3s; transform: scale(1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: none; cursor: pointer; margin-top: 0.5rem;"
