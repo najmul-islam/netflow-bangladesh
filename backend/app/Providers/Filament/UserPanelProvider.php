@@ -25,7 +25,7 @@ class UserPanelProvider extends PanelProvider
         return $panel
             ->id('user')
             ->path('/')
-            ->login()
+            ->login(\App\Filament\User\Pages\Auth\Login::class)
             ->colors([
                 'primary' => [
                     50 => '#eff6ff',
