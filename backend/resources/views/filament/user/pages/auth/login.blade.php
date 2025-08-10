@@ -1,19 +1,20 @@
 <x-filament-panels::page.simple>
-    <div class="min-h-screen bg-gradient-to-br from-[#0B2E58] via-blue-800 to-[#F76704] flex items-center justify-center p-4">
+    <div
+        style="min-height: 100vh; background: linear-gradient(135deg, #0B2E58 0%, #1e40af 25%, #F76704 75%, #ea580c 100%); display: flex; align-items: center; justify-content: center; padding: 1rem;">
         <style>
             /* Hide all Filament defaults completely */
             .fi-simple-header,
             .fi-simple-layout .fi-header,
             .fi-layout-header,
-            .fi-simple-main > .fi-section-header,
-            .fi-simple-main > .fi-header,
+            .fi-simple-main>.fi-section-header,
+            .fi-simple-main>.fi-header,
             .fi-page-header,
             .fi-breadcrumbs,
             .fi-simple-layout .fi-logo,
             .fi-simple-layout .fi-brand {
                 display: none !important;
             }
-            
+
             /* Ensure full viewport coverage */
             .fi-simple-layout,
             .fi-simple-main {
@@ -22,47 +23,69 @@
                 margin: 0 !important;
                 min-height: 100vh !important;
             }
-            
+
             /* Style form inputs to match design */
             .fi-input input {
-                @apply w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#F76704] focus:border-transparent transition-all duration-200 bg-white;
+                width: 100%;
+                padding: 0.75rem 1rem;
+                border: 1px solid #d1d5db;
+                border-radius: 0.75rem;
+                background-color: #ffffff;
+                transition: all 0.2s;
             }
-            
+
+            .fi-input input:focus {
+                outline: none;
+                border-color: transparent;
+                box-shadow: 0 0 0 2px #F76704;
+            }
+
             /* Style form labels */
             .fi-field-label {
-                @apply text-[#0B2E58] font-medium mb-2;
+                color: #0B2E58;
+                font-weight: 500;
+                margin-bottom: 0.5rem;
             }
-            
+
             /* Style checkbox for remember me */
             .fi-checkbox input {
-                @apply text-[#F76704] focus:ring-[#F76704];
+                color: #F76704;
+            }
+
+            .fi-checkbox input:focus {
+                box-shadow: 0 0 0 2px #F76704;
             }
         </style>
-        
-        <div class="w-full max-w-md">
+
+        <div style="width: 100%; max-width: 28rem;">
             <!-- Main login card -->
-            <div class="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20">
+            <div
+                style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.2);">
                 <!-- Brand section -->
-                <div class="text-center mb-8">
-                    <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#0B2E58] to-[#F76704] rounded-xl shadow-lg mb-4">
-                        <span class="text-2xl font-bold text-white">NF</span>
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div
+                        style="display: inline-flex; align-items: center; justify-content: center; width: 4rem; height: 4rem; background: linear-gradient(135deg, #0B2E58 0%, #F76704 100%); border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); margin-bottom: 1rem;">
+                        <span style="font-size: 1.5rem; font-weight: bold; color: white;">NF</span>
                     </div>
-                    <h1 class="text-2xl font-bold text-[#0B2E58] mb-1">NetFlow Bangladesh</h1>
-                    <p class="text-gray-600 text-sm">Sign in to continue your learning journey</p>
+                    <h1 style="font-size: 1.5rem; font-weight: bold; color: #0B2E58; margin-bottom: 0.25rem;">NetFlow
+                        Bangladesh</h1>
+                    <p style="color: #6b7280; font-size: 0.875rem;">Sign in to continue your learning journey</p>
                 </div>
 
                 <!-- Login form -->
-                <form wire:submit="authenticate" class="space-y-5">
+                <form wire:submit="authenticate" style="display: flex; flex-direction: column; gap: 1.25rem;">
                     {{ $this->form }}
-                    
+
                     <!-- Submit button -->
-                    <button 
-                        type="submit" 
-                        class="w-full bg-gradient-to-r from-[#0B2E58] to-blue-700 hover:from-[#0B2E58] hover:to-[#F76704] text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#F76704] focus:ring-offset-2"
-                    >
-                        <span class="inline-flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                    <button type="submit"
+                        style="width: 100%; background: linear-gradient(135deg, #0B2E58 0%, #1e40af 100%); color: white; font-weight: 600; padding: 0.75rem 1rem; border-radius: 0.75rem; transition: all 0.3s; transform: scale(1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: none; cursor: pointer;"
+                        onmouseover="this.style.background='linear-gradient(135deg, #0B2E58 0%, #F76704 100%)'; this.style.transform='scale(1.02)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.1)';"
+                        onmouseout="this.style.background='linear-gradient(135deg, #0B2E58 0%, #1e40af 100%)'; this.style.transform='scale(1)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)';">
+                        <span style="display: inline-flex; align-items: center;">
+                            <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                             </svg>
                             Sign In
                         </span>
@@ -70,12 +93,15 @@
                 </form>
 
                 <!-- Footer links -->
-                <div class="mt-6 pt-6 border-t border-gray-200">
-                    <div class="flex justify-between items-center text-sm">
-                        <a href="#" class="text-[#F76704] hover:text-[#0B2E58] transition-colors">
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem;">
+                        <a href="#" style="color: #F76704; text-decoration: none; transition: color 0.2s;"
+                            onmouseover="this.style.color='#0B2E58';" onmouseout="this.style.color='#F76704';">
                             Forgot password?
                         </a>
-                        <a href="#" class="text-gray-600 hover:text-[#0B2E58] transition-colors">
+                        <a href="#" style="color: #6b7280; text-decoration: none; transition: color 0.2s;"
+                            onmouseover="this.style.color='#0B2E58';" onmouseout="this.style.color='#6b7280';">
                             Need help?
                         </a>
                     </div>
@@ -83,40 +109,56 @@
             </div>
 
             <!-- Features grid -->
-            <div class="mt-8 grid grid-cols-3 gap-4 text-center">
-                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            <div
+                style="margin-top: 2rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
+                <div
+                    style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(4px); border-radius: 0.5rem; padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.2);">
+                    <div
+                        style="width: 2.5rem; height: 2.5rem; background: rgba(255, 255, 255, 0.2); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem;">
+                        <svg style="width: 1.25rem; height: 1.25rem; color: white;" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                     </div>
-                    <h3 class="text-white font-medium text-xs">Expert Courses</h3>
-                    <p class="text-white/80 text-xs mt-1">Professional training</p>
+                    <h3 style="color: white; font-weight: 500; font-size: 0.75rem;">Expert Courses</h3>
+                    <p style="color: rgba(255, 255, 255, 0.8); font-size: 0.75rem; margin-top: 0.25rem;">Professional
+                        training</p>
                 </div>
-                
-                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+
+                <div
+                    style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(4px); border-radius: 0.5rem; padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.2);">
+                    <div
+                        style="width: 2.5rem; height: 2.5rem; background: rgba(255, 255, 255, 0.2); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem;">
+                        <svg style="width: 1.25rem; height: 1.25rem; color: white;" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                         </svg>
                     </div>
-                    <h3 class="text-white font-medium text-xs">Certifications</h3>
-                    <p class="text-white/80 text-xs mt-1">Recognized credentials</p>
+                    <h3 style="color: white; font-weight: 500; font-size: 0.75rem;">Certifications</h3>
+                    <p style="color: rgba(255, 255, 255, 0.8); font-size: 0.75rem; margin-top: 0.25rem;">Recognized
+                        credentials</p>
                 </div>
-                
-                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+
+                <div
+                    style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(4px); border-radius: 0.5rem; padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.2);">
+                    <div
+                        style="width: 2.5rem; height: 2.5rem; background: rgba(255, 255, 255, 0.2); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem;">
+                        <svg style="width: 1.25rem; height: 1.25rem; color: white;" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
-                    <h3 class="text-white font-medium text-xs">Fast Learning</h3>
-                    <p class="text-white/80 text-xs mt-1">Accelerated paths</p>
+                    <h3 style="color: white; font-weight: 500; font-size: 0.75rem;">Fast Learning</h3>
+                    <p style="color: rgba(255, 255, 255, 0.8); font-size: 0.75rem; margin-top: 0.25rem;">Accelerated
+                        paths</p>
                 </div>
             </div>
 
             <!-- Copyright -->
-            <p class="text-center text-white/60 text-xs mt-6">
+            <p style="text-align: center; color: rgba(255, 255, 255, 0.6); font-size: 0.75rem; margin-top: 1.5rem;">
                 © 2025 NetFlow Bangladesh. All rights reserved.
             </p>
         </div>
