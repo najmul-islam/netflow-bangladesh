@@ -20,7 +20,7 @@ class User extends Authenticatable
     protected $fillable = [
         'email',
         'username', 
-        'password_hash',
+        'password',
         'first_name',
         'last_name',
         'phone',
@@ -34,20 +34,9 @@ class User extends Authenticatable
     ];
 
     protected $hidden = [
-        'password_hash',
+        'password',
         'remember_token',
     ];
-
-    // Accessors & Mutators
-    public function getPasswordAttribute()
-    {
-        return $this->password_hash;
-    }
-
-    public function setPasswordAttribute($value)
-    {
-        $this->attributes['password_hash'] = $value;
-    }
 
     protected $casts = [
         'email_verified' => 'boolean',
@@ -56,12 +45,60 @@ class User extends Authenticatable
         'updated_at' => 'datetime',
     ];
 
+    // Laravel Authentication Methods
+    public function getAuthIdentifierName()
+    {
+        return 'email'; // Use email for login
+    }
+
+    public function getAuthIdentifier()
+    {
+        return $this->email;
+    }
+
+    public function getAuthPassword()
+    {
+        return $this->password;
+    }
+
+    // Remember Token Methods
+    public function getRememberToken()
+    {
+        return $this->remember_token;
+    }
+
+    public function setRememberToken($value)
+    {
+        $this->remember_token = $value;
+    }
+
+    public function getRememberTokenName()
+    {
+        return 'remember_token';
+    }
+
+    // Password Accessors for compatibility
+    // public function getPasswordAttribute()
+    // {
+    //     return $this->password;
+    // }
+
+    // public function setPasswordAttribute($value)
+    // {
+    //     $this->attributes['password'] = $value;
+    // }
+
+    // Name accessor for Filament compatibility
+    public function getNameAttribute()
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
+
     // Relationships
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id')
-                    ->withPivot('assigned_at', 'assigned_by')
-                    ->withTimestamps();
+                    ->withPivot('assigned_at', 'assigned_by');
     }
 
     public function batchEnrollments()
@@ -114,6 +151,15 @@ class User extends Authenticatable
     public function hasRole($roleName)
     {
         return $this->roles()->where('role_name', $roleName)->exists();
+    }
+
+    public function hasAnyRole($roleNames)
+    {
+        if (is_string($roleNames)) {
+            $roleNames = [$roleNames];
+        }
+        
+        return $this->roles()->whereIn('role_name', $roleNames)->exists();
     }
 
     public function hasPermission($permissionName)

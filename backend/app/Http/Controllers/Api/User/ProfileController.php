@@ -334,14 +334,14 @@ class ProfileController extends Controller
 
         $user = auth()->user();
 
-        if (!Hash::check($request->current_password, $user->password_hash)) {
+        if (!Hash::check($request->current_password, $user->password)) {
             return response()->json([
                 'message' => 'Invalid current password'
             ], 400);
         }
 
         $user->update([
-            'password_hash' => Hash::make($request->new_password)
+            'password' => Hash::make($request->new_password)
         ]);
 
         return response()->json([

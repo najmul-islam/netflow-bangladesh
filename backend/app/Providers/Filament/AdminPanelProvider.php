@@ -27,9 +27,25 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->authGuard('web')
+            ->authPasswordBroker('users')
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => [
+                    50 => '#eff6ff',
+                    100 => '#dbeafe', 
+                    200 => '#bfdbfe',
+                    300 => '#93c5fd',
+                    400 => '#60a5fa',
+                    500 => '#0B2E58',
+                    600 => '#0B2E58',
+                    700 => '#0B2E58',
+                    800 => '#0B2E58',
+                    900 => '#0B2E58',
+                    950 => '#0B2E58',
+                ],
             ])
+            ->brandName('NetFlow Bangladesh Admin')
+            ->favicon(asset('favicon.ico'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
@@ -53,6 +69,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                // \App\Http\Middleware\AdminAccess::class,
             ]);
     }
 }

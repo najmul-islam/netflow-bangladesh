@@ -22,8 +22,8 @@
 
 ### 4. **User Model & Auth Controller Alignment**
 
--   Verified User model uses `password_hash` field correctly
--   AuthController properly maps password to password_hash
+-   Verified User model uses `password` field correctly
+-   AuthController properly maps password to password
 -   **Issue Fixed**: Authentication registration/login issues
 
 ### 5. **Route Registration Verified**

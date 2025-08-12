@@ -85,7 +85,7 @@ class AuthController extends Controller
                 'last_name' => $request->last_name,
                 'email' => $request->email,
                 'username' => $request->username,
-                'password_hash' => Hash::make($request->password),
+                'password' => Hash::make($request->password),
                 'phone' => $request->phone,
                 'status' => 'active',
                 'email_verified' => false,
@@ -173,7 +173,7 @@ class AuthController extends Controller
 
             $user = User::where('email', $request->email)->first();
 
-            if (!$user || !Hash::check($request->password, $user->password_hash)) {
+            if (!$user || !Hash::check($request->password, $user->password)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid credentials'
