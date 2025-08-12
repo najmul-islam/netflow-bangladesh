@@ -28,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->authGuard('web')
-            ->authPasswordBroker('users')
+            // ->authPasswordBroker('users')
             ->colors([
                 'primary' => [
                     50 => '#eff6ff',
@@ -69,7 +69,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                // \App\Http\Middleware\AdminAccess::class,
+                \App\Http\Middleware\AdminAccess::class,
             ]);
     }
 }

@@ -12,16 +12,7 @@ class AdminAccess
     {
         $user = Auth::user();
         
-        // Debug: Check if user is authenticated
-        dd([
-            'user_authenticated' => Auth::check(),
-            'user_id' => $user ? $user->id : null,
-            'user_email' => $user ? $user->email : null,
-            'user_roles' => $user ? $user->roles->pluck('name')->toArray() : [],
-            'has_admin_role' => $user ? $user->hasRole('admin') : false,
-            'request_url' => $request->url(),
-            'request_route' => $request->route() ? $request->route()->getName() : null,
-        ]);
+        
         
         // If user is not authenticated, this should be handled by Authenticate middleware first
         if (!$user) {
