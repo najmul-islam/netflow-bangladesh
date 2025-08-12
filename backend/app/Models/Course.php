@@ -76,11 +76,7 @@ class Course extends Model
         return $this->hasMany(Module::class, 'course_id')->orderBy('sort_order');
     }
 
-    public function instructors()
-    {
-        return $this->belongsToMany(User::class, 'course_instructors', 'course_id', 'user_id')
-                    ->withPivot('role', 'assigned_at');
-    }
+ 
 
     public function tags()
     {
@@ -111,5 +107,18 @@ class Course extends Model
     public function hasBatchesEnabled()
     {
         return $this->enable_batches;
+    }
+
+    public function lessons()
+    {
+        return $this->hasMany(Lesson::class, 'course_id');
+    }
+    public function courseInstructors()
+    {
+        return $this->hasMany(CourseInstructor::class, 'course_id');
+    }
+    public function instructors()
+    {
+        return $this->belongsToMany(User::class, 'course_instructors', 'course_id', 'user_id');
     }
 }

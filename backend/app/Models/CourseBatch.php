@@ -28,6 +28,7 @@ class CourseBatch extends Model
         'enrollment_end_date',
         'status',
         'batch_type',
+        'zoom_link',
         'timezone',
         'is_featured',
         'auto_generated',

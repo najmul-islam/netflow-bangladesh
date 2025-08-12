@@ -77,28 +77,30 @@ class User extends Authenticatable
         return 'remember_token';
     }
 
-    // Password Accessors for compatibility
-    // public function getPasswordAttribute()
-    // {
-    //     return $this->password;
-    // }
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id', 'user_id', 'role_id');
+    }
 
-    // public function setPasswordAttribute($value)
-    // {
-    //     $this->attributes['password'] = $value;
-    // }
+    public function userRoles()
+    {
+        return $this->hasMany(UserRole::class, 'user_id', 'user_id');
+    }
+
+    public function courseInstructors()
+    {
+        return $this->hasMany(CourseInstructor::class, 'user_id', 'user_id');
+    }
+
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'course_instructors', 'user_id', 'course_id', 'user_id', 'course_id');
+}
 
     // Name accessor for Filament compatibility
     public function getNameAttribute()
     {
         return trim($this->first_name . ' ' . $this->last_name);
-    }
-
-    // Relationships
-    public function roles()
-    {
-        return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id')
-                    ->withPivot('assigned_at', 'assigned_by');
     }
 
     public function batchEnrollments()

@@ -18,6 +18,7 @@ class Lesson extends Model
     protected $fillable = [
         'module_id',
         'batch_id',
+        'course_id',
         'title',
         'content_type',
         'content_url',
@@ -148,5 +149,10 @@ class Lesson extends Model
         }
         
         return $minutes . 'm';
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id');
     }
 }
