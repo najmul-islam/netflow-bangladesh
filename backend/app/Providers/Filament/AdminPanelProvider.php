@@ -32,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => [
                     50 => '#eff6ff',
-                    100 => '#dbeafe', 
+                    100 => '#dbeafe',
                     200 => '#bfdbfe',
                     300 => '#93c5fd',
                     400 => '#60a5fa',
@@ -69,7 +69,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                \App\Http\Middleware\AdminAccess::class,
+                // \App\Http\Middleware\AdminAccess::class,
             ]);
     }
 }
